@@ -2,13 +2,14 @@ const path = require('path');
 const fs = require('fs');
 const rootDir = require('../utils/path');
 
+const p = path.join(rootDir, 'data', 'products.json');
 const getProductsFromFile = (cb) => {
-    const p = path.join(rootDir, 'data', 'products.json');
     fs.readFile(p, (err, fileContent) => {
         if (err) {
             cb([]);
+        } else {
+            cb(JSON.parse(fileContent));
         }
-        cb(JSON.parse(fileContent));
     });
 };
 
