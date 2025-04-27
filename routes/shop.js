@@ -13,7 +13,7 @@ router.get('/', (req, res, next) => {
         products: adminData.products,
         pageTitle: 'Shop',
         productCss: true, 
-        activeShop: true,
+        path: '/',
     });
 
 });

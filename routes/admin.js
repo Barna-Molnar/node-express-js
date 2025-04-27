@@ -12,7 +12,7 @@ router.get('/add-product', (req, res, next) => {
      res.render('add-product', { 
         pageTitle: 'Add Prodcut Page',
         formCss: true,
-        acitveAddProduct: true,
+        path: '/admin/add-product',
     });
 });
 
