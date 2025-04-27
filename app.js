@@ -23,7 +23,7 @@ app.use('/', (req, res, next) => {
     console.log('Page not found middleware');
     // chaining fns => send has to be the last one
     // res.status(404).sendFile(path.join(rootDir, 'views', '404.html'));
-    res.status(404).render('404', { pageTitle: 'Page not found EJS'});
+    res.status(404).render('404', { pageTitle: 'Page not found Template'});
 });
 
 app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
