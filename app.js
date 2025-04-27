@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const rootDir  = require('./utils/path')
 const adminData = require('./routes/admin')
 const shopRoutes = require('./routes/shop')
 
@@ -10,7 +9,6 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 
 app.set('view engine', 'ejs'); 
-// app.engine('hbs', hbs.engine)
 app.set('views', 'views'); // set the views directory
 
 app.use(bodyParser.urlencoded({ extended: false }));
