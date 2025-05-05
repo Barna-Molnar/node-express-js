@@ -3,14 +3,37 @@ const path = require('path');
 
 const p = path.join(path.dirname(process.mainModule.filename), 'data', 'cart.json');
 
-const calculateTotal = (sum1, sum2) => {
-    return Number(sum1) + Number(sum2);
+const addToTotal = (total, sum2) => {
+    return Number(total) + Number(sum2);
+}
+const subtractFromTotal = (total, sum2) => {
+    return Number(total) - Number(sum2);
 }
 
 module.exports = class Cart {
     constructor() {
         this.products = [];
         this.totalPrice = 0;
+    }
+
+    static deleteProductById(id, price) {
+        fs.readFile(p, (err, fileContent) => {
+            if(err) {
+                console.log('Error while retrieving file : ', err)
+                return;
+            }
+            const cart = JSON.parse(fileContent);
+            const toBeDeletedProduct = cart.products.find(p => p.id === id);
+            if(toBeDeletedProduct) {
+                const updatedProducts = cart.products.filter(p => p.id !== toBeDeletedProduct.id);
+                const updatedTotalPrice = subtractFromTotal(cart.totalPrice, price * toBeDeletedProduct.qty);
+                const updatedCart = { products: updatedProducts, totalPrice: updatedTotalPrice };
+                console.log('updatedCart : ', JSON.stringify(updatedCart));
+                fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
+                    console.log('Error while writing file : ', err);
+                })
+            }
+        })
     }
 
     static addProduct(id, productPrice) {
@@ -30,15 +53,14 @@ module.exports = class Cart {
                 const updatedProduct = { ...existingProduct, qty: existingProduct.qty + 1 };
                 cart.products = [...cart.products];
                 cart.products[existinfProductIndex] = updatedProduct;
-                cart.totalPrice = calculateTotal(cart.totalPrice, productPrice);
+                cart.totalPrice = addToTotal(cart.totalPrice, productPrice);
             } else {
                 // add new product / increase totalprice
                 const newProduct = { id: id, qty: 1 };
                 cart.products = [...cart.products, newProduct];
-                cart.totalPrice = calculateTotal(cart.totalPrice, productPrice);
+                cart.totalPrice = addToTotal(cart.totalPrice, productPrice);
             }
 
-            console.log({ cart });
             fs.writeFile(p, JSON.stringify(cart), (err) => {
                 if(err) console.log(`Error whilst writing data into ${p} Err: ${err}`);
             });
