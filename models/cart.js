@@ -4,10 +4,12 @@ const path = require('path');
 const p = path.join(path.dirname(process.mainModule.filename), 'data', 'cart.json');
 
 const addToTotal = (total, sum2) => {
-    return Number(total) + Number(sum2);
+    const totalPrice = Number(total) + Number(sum2)
+    return Number(totalPrice.toFixed(2))
 }
 const subtractFromTotal = (total, sum2) => {
-    return Number(total) - Number(sum2);
+    const totalPrice = Number(total) - Number(sum2)
+    return Number(totalPrice.toFixed(2))
 }
 
 module.exports = class Cart {
@@ -66,5 +68,16 @@ module.exports = class Cart {
             });
         });
 
+    }
+
+    static getCart(cb) {
+        fs.readFile(p, (err, fileContent) => {
+            if(err) {
+                console.log('Error while retrieving file from Cart : ', err)
+                cb(null)
+            }
+            const cart = JSON.parse(fileContent);
+            cb(cart);
+        })
     }
 };
