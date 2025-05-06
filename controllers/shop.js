@@ -21,13 +21,16 @@ exports.getProduct = (req, res, next) => {
     });
 };
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll((products) => {
+    Product.fetchAll()
+    .then(([rows, _filedData]) => {
+        console.log(rows)
         res.render('shop/index', {
-            prods: products,
+            prods: rows,
             pageTitle: 'Shop',
             path: '/',
         });
-    });
+    })
+    .catch(err => console.log('Error while fetching products : ', err));
 };
 
 exports.postCart = (req, res, next) => {
