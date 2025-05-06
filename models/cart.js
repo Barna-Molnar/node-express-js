@@ -30,7 +30,7 @@ module.exports = class Cart {
                 const updatedProducts = cart.products.filter(p => p.id !== toBeDeletedProduct.id);
                 const updatedTotalPrice = subtractFromTotal(cart.totalPrice, price * toBeDeletedProduct.qty);
                 const updatedCart = { products: updatedProducts, totalPrice: updatedTotalPrice };
-                console.log('updatedCart : ', JSON.stringify(updatedCart));
+                // console.log('updatedCart : ', JSON.stringify(updatedCart));
                 fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
                     console.log('Error while writing file : ', err);
                 })
