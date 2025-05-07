@@ -11,6 +11,7 @@ module.exports = class Product {
     }
 
     save() {
+        return db.execute('INSERT INTO products (title, price, description, imageUrl) VALUES (?, ?, ?, ?)', [this.title, this.price, this.description, this.imageUrl])
     }
 
     static fetchAll() {
@@ -18,9 +19,12 @@ module.exports = class Product {
     }
 
     static findById(productId) {
+        return db.execute('SELECT * FROM products WHERE products.id = ? LIMIT 1;',[productId])
     }
 
     static delete(productId) {
+        return db.execute('DELETE FROM products WHERE products.id = ?;', [productId])
+       
     }
 
 };

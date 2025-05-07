@@ -2,23 +2,29 @@ const Product = require('../models/product');
 const Cart = require('../models/cart');
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll((products) => {
+    Product.fetchAll()
+    .then(([rows, _filedData]) => {
         res.render('shop/product-list', {
-            prods: products,
+            prods: rows,
             pageTitle: 'All Products',
             path: '/products',
         });
+    })
+    .catch(err => {
+        console.log('Error while fetching products : ', err)
     });
 };
 exports.getProduct = (req, res, next) => {
     const productId = req.params.productId;
-    Product.findById(productId, (foundProduct) => {
+    Product.findById(productId)
+    .then((serverResponse) => {
+        const foundProduct = serverResponse[0][0];
         res.render('shop/product-detail', {
             product: foundProduct,
             pageTitle: foundProduct.title,
             path: '/product',
         });
-    });
+    })
 };
 exports.getIndex = (req, res, next) => {
     Product.fetchAll()
@@ -30,7 +36,9 @@ exports.getIndex = (req, res, next) => {
             path: '/',
         });
     })
-    .catch(err => console.log('Error while fetching products : ', err));
+    .catch(err => {
+        console.log('Error while fetching products : ', err)
+    });
 };
 
 exports.postCart = (req, res, next) => {
