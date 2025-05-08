@@ -5,6 +5,7 @@ const path = require('path');
 const adminRoutes = require('./routes/admin')
 const shopRoutes = require('./routes/shop')
 const errorController =  require('./controllers/error')
+const sequelize  = require('./utils/database');
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -19,4 +20,9 @@ app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
 app.use('/', errorController.pageNotFound);
 
-app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
+sequelize.sync().then((result) => {
+    console.log('Database synced successfully');
+    app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
+}).catch((err) => {
+    console.log('Error while syncing database : ', err);
+});
