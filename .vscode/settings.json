@@ -2,5 +2,15 @@
     "javascript.suggest.completeFunctionCalls": true,
     "javascript.suggest.enabled": true,
     "javascript.suggest.paths": true,
-    "javascript.suggest.autoImports": true
+    "javascript.suggest.autoImports": true,
+    "javascript.suggest.jsdoc.generateReturns": true,
+    "typescript.suggest.completeFunctionCalls": true,
+    "editor.suggestSelection": "first",
+    "editor.suggest.showMethods": true,
+    "editor.suggest.showProperties": true,
+    "editor.suggest.showFunctions": true,
+    "editor.suggest.showClasses": true,
+    "editor.suggest.showVariables": true,
+    "editor.suggest.showWords": true,
+    "editor.suggest.showSnippets": true
 } 
