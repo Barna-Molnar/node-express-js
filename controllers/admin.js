@@ -59,12 +59,17 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-    const product = new Product({
+
+    const product = {
         title: req.body.title,
         price: req.body.price,
         description: req.body.description,
         imageUrl: req.body.imageUrl
-    });
-    product.save();
-    res.redirect('/');
+    }
+
+    Product.create(product)
+    .then((insertResponse) => {
+        console.log('insert response : ', insertResponse);
+        res.redirect('/');
+    })
 };
