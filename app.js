@@ -27,10 +27,23 @@ Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 User.hasMany(Product);
 
 sequelize
-    .sync({ force: true })
+    // .sync({ force: true })
+    .sync()
     .then((result) => {
         console.log('Database synced successfully');
+        return User.findByPk(1)
+        
+    })
+    .then(user => {
+        if(!user) {
+            return User.create({name: 'Admin-Barni', email: 'barni.admin@nodeApp.com'})
+        }
+        return  user
+    })
+    .then(user => {
+        console.log(`Database synced successfully and logged in with User ${user.name}`);
         app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
-    }).catch((err) => {
+    })
+    .catch((err) => {
         console.log('Error while syncing database : ', err);
     });
