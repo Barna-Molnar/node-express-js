@@ -1,7 +1,18 @@
-const Sequelize  =  require('sequelize')
-
+const Sequelize = require('sequelize')
 const sequelize = require('../utils/database')
 
+/**
+ * @typedef {Object} ProductAttributes
+ * @property {number} id
+ * @property {string} title
+ * @property {number} price
+ * @property {string} imageUrl
+ * @property {string} description
+ */
+
+/**
+ * @type {import('sequelize').ModelStatic<import('sequelize').Model<ProductAttributes>>}
+ */
 const Product = sequelize.define('product', {
     id: {
         type: Sequelize.INTEGER,
