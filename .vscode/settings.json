@@ -1,0 +1,6 @@
+{
+    "javascript.suggest.completeFunctionCalls": true,
+    "javascript.suggest.enabled": true,
+    "javascript.suggest.paths": true,
+    "javascript.suggest.autoImports": true
+} 
