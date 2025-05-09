@@ -18,6 +18,15 @@ app.set('views', 'views'); // set the views directory
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public'))); // serve static files
 
+app.use((req, res, next) => {
+    User.findByPk(1)
+    .then(user => {
+        req.user = user; // store user in all incoming request
+        next(); // go on with the next step
+    })
+    .catch(err =>  console.log(err))
+})
+
 app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
 app.use('/', errorController.pageNotFound);
@@ -36,6 +45,7 @@ sequelize
     })
     .then(user => {
         if(!user) {
+            console.log('user not found')
             return User.create({name: 'Admin-Barni', email: 'barni.admin@nodeApp.com'})
         }
         return  user

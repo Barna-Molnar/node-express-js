@@ -2,8 +2,8 @@ const Product = require('../models/product');
 const Cart = require('../models/cart');
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
-    .then(([rows, _filedData]) => {
+    Product.findAll()
+    .then((rows) => {
         res.render('shop/product-list', {
             prods: rows,
             pageTitle: 'All Products',
@@ -16,20 +16,23 @@ exports.getProducts = (req, res, next) => {
 };
 exports.getProduct = (req, res, next) => {
     const productId = req.params.productId;
-    Product.findById(productId)
-    .then((serverResponse) => {
-        const foundProduct = serverResponse[0][0];
+    Product.findByPk(productId)
+    .then((product) => {
+        console.log('singleProduct', product)
         res.render('shop/product-detail', {
-            product: foundProduct,
-            pageTitle: foundProduct.title,
+            product: product,
+            pageTitle: product.title,
             path: '/product',
         });
     })
+    .catch(err => {
+        console.log('Error while fetching product : ', err)
+    });
 };
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll()
-    .then(([rows, _filedData]) => {
-        console.log(rows)
+    Product.findAll()
+    .then((rows) => {
+        console.log('rows', rows)
         res.render('shop/index', {
             prods: rows,
             pageTitle: 'Shop',
@@ -43,12 +46,13 @@ exports.getIndex = (req, res, next) => {
 
 exports.postCart = (req, res, next) => {
     const productId = req.body.productId;
-    Product.findById(productId, (product) => {
+    Product.findByPk(productId)
+    .then((product) => {
         Cart.addProduct(productId, product.price);
-    });
-    res.redirect('/cart');
-
+        res.redirect('/cart');
+    })
 };
+
 exports.getCart = (req, res, next) => {
     Cart.getCart((cart) => {
         Product.fetchAll((products) => {
@@ -74,11 +78,15 @@ exports.getCart = (req, res, next) => {
 
 exports.postDeleteProductFromCart = (req, res, next) => {
     const productId = req.body.productId;
-    Product.findById(productId, (product) => {
+    Product.findByPk(productId)
+    .then(product => {
         Cart.deleteProductById(productId, product.price);
         res.redirect('/cart');
     })
-}
+    .catch(err => {
+        console.log('Error while deleting from cart : ', err)
+    });
+};
 exports.getOrders = (req, res, next) => {
 
     res.render('shop/orders', {
