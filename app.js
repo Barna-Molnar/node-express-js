@@ -64,11 +64,10 @@ sequelize
         return user;
     })
     .then(user => {
-        console.log(`Database synced successfully and logged in with User ${user.name}`);
+        // console.log(`Database synced successfully and logged in with User ${user.name}`);
         return user.createCart();
     })
     .then(cart => {
-        console.log('Cart created successfully');
         app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
     })
     .catch((err) => {

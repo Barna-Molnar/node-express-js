@@ -56,10 +56,10 @@ exports.postCart = (req, res, next) => {
         .then(products => {
             const product = products[0] || undefined;
             if (product) {
-                newQuantity = product.cartItem.quantity + 1
-                return product
+                newQuantity = product.cartItem.quantity + 1;
+                return product;
             } else {
-                return Product.findByPk(productId)
+                return Product.findByPk(productId);
             }
         })
         .then(product => {
@@ -86,6 +86,31 @@ exports.getCart = (req, res, next) => {
                 totalPrice: 0,
             });
         });
+};
+
+exports.postCreateOrder = (req, res, next) => {
+    req.user
+        .getCart()
+        .then(cart => {
+            return cart.getProducts();
+        })
+        .then(products => {
+           return req.user
+                .createOrder()
+                .then((order) => {
+                    return order.addProducts(
+                        products.map(product => {
+                            product.orderItem = { quantity: product.cartItem.quantity }
+                            return product
+                        })
+                    );
+                })
+                .catch(err => console.log('ERROR:', err))
+        })
+        .then(result => {
+            res.redirect('/orders')
+        })
+
 };
 
 exports.postDeleteProductFromCart = (req, res, next) => {
