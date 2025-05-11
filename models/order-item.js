@@ -1,17 +1,18 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../utils/database');
 
+
 /**
- * @typedef {Object} CartItemAttributes
+ * @typedef {Object} OrderItemAttributes
  * @property {number} id
  * @property {number} quantity
  */
 
 /**
- * @type {import('sequelize').ModelStatic<import('sequelize').Model<CartItemAttributes>>}
+ * @type {import('sequelize').ModelStatic<import('sequelize').Model<OrderItemAttributes>>}
 **/
 
-const CartItem = sequelize.define('cartItem', {
+const OrderItem = sequelize.define('orderItem', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -28,4 +29,4 @@ const CartItem = sequelize.define('cartItem', {
     // }
 });
 
-module.exports = CartItem;
+module.exports = OrderItem;

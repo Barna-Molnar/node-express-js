@@ -10,6 +10,8 @@ const Product = require('./models/product');
 const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -22,12 +24,12 @@ app.use(express.static(path.join(__dirname, 'public'))); // serve static files
 
 app.use((req, res, next) => {
     User.findByPk(1)
-    .then(user => {
-        req.user = user; // store user in all incoming request
-        next(); // go on with the next step
-    })
-    .catch(err =>  console.log(err))
-})
+        .then(user => {
+            req.user = user; // store user in all incoming request
+            next(); // go on with the next step
+        })
+        .catch(err => console.log(err));
+});
 
 app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
@@ -41,20 +43,25 @@ Cart.belongsTo(User);
 Cart.belongsToMany(Product, { through: CartItem });
 Product.belongsToMany(Cart, { through: CartItem });
 
+
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, { through: OrderItem });
+
 sequelize
     // .sync({ force: true })
     .sync()
     .then((result) => {
         console.log('Database synced successfully');
-        return User.findByPk(1)
-        
+        return User.findByPk(1);
+
     })
     .then(user => {
-        if(!user) {
-            console.log('user not found')
-            return User.create({name: 'Admin-Barni', email: 'barni.admin@nodeApp.com'})
+        if (!user) {
+            console.log('user not found');
+            return User.create({ name: 'Admin-Barni', email: 'barni.admin@nodeApp.com' });
         }
-        return  user
+        return user;
     })
     .then(user => {
         console.log(`Database synced successfully and logged in with User ${user.name}`);
