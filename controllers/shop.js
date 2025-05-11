@@ -3,89 +3,111 @@ const Cart = require('../models/cart');
 
 exports.getProducts = (req, res, next) => {
     Product.findAll()
-    .then((rows) => {
-        res.render('shop/product-list', {
-            prods: rows,
-            pageTitle: 'All Products',
-            path: '/products',
+        .then((rows) => {
+            res.render('shop/product-list', {
+                prods: rows,
+                pageTitle: 'All Products',
+                path: '/products',
+            });
+        })
+        .catch(err => {
+            console.log('Error while fetching products : ', err);
         });
-    })
-    .catch(err => {
-        console.log('Error while fetching products : ', err)
-    });
 };
 exports.getProduct = (req, res, next) => {
     const productId = req.params.productId;
     Product.findByPk(productId)
-    .then((product) => {
-        console.log('singleProduct', product)
-        res.render('shop/product-detail', {
-            product: product,
-            pageTitle: product.title,
-            path: '/product',
+        .then((product) => {
+            console.log('singleProduct', product);
+            res.render('shop/product-detail', {
+                product: product,
+                pageTitle: product.title,
+                path: '/product',
+            });
+        })
+        .catch(err => {
+            console.log('Error while fetching product : ', err);
         });
-    })
-    .catch(err => {
-        console.log('Error while fetching product : ', err)
-    });
 };
 exports.getIndex = (req, res, next) => {
     Product.findAll()
-    .then((rows) => {
-        console.log('rows', rows)
-        res.render('shop/index', {
-            prods: rows,
-            pageTitle: 'Shop',
-            path: '/',
+        .then((rows) => {
+            console.log('rows', rows);
+            res.render('shop/index', {
+                prods: rows,
+                pageTitle: 'Shop',
+                path: '/',
+            });
+        })
+        .catch(err => {
+            console.log('Error while fetching products : ', err);
         });
-    })
-    .catch(err => {
-        console.log('Error while fetching products : ', err)
-    });
 };
 
 exports.postCart = (req, res, next) => {
     const productId = req.body.productId;
-    Product.findByPk(productId)
-    .then((product) => {
-        Cart.addProduct(productId, product.price);
-        res.redirect('/cart');
-    })
+    const newQuantity = 1;
+    let fetchedCart;
+
+    req.user
+        .getCart()
+        .then(cart => {
+            fetchedCart = cart;
+            return cart.getProducts({ where: { id: productId } });
+        })
+        .then(products => {
+            const product = products[0] || undefined;
+            if (product) {
+                // later
+            } else { 
+                return Product.findByPk(productId)
+                    .then(product => {
+                        return fetchedCart.addProduct(product, { through: { quantity: newQuantity } });
+                    })
+                    .catch(err => {
+                        console.log('Error while adding product to cart : ', err);
+                    });
+            }
+        })
+        .then(() => {
+            res.redirect('/cart')
+        })
+        .catch(err => {
+            console.log('Error while fetching cart : ', err);
+        });
+
+    // Product.findByPk(productId)
+    //     .then((product) => {
+    //         Cart.addProduct(productId, product.price);
+    //         res.redirect('/cart');
+    //     });
 };
 
 exports.getCart = (req, res, next) => {
-    Cart.getCart((cart) => {
-        Product.fetchAll((products) => {
-            const carProducts = [];
-            products.forEach(product => {
-                const foundProductInCart = cart.products.find(p => p.id === product.id);
-                if (foundProductInCart) {
-                    carProducts.push({ productData: product, qty: foundProductInCart.qty });
-                }
-            });
-
-
+    req.user.getCart()
+        .then(cart => {
+            return cart.getProducts();
+        })
+        .then(products => {
             res.render('shop/cart', {
                 pageTitle: 'Your Cart',
                 path: '/cart',
-                products: carProducts,
-                totalPrice: cart.totalPrice,
+                products: products,
+                totalPrice: 0,
             });
         });
-    });
-
 };
 
 exports.postDeleteProductFromCart = (req, res, next) => {
     const productId = req.body.productId;
     Product.findByPk(productId)
-    .then(product => {
-        Cart.deleteProductById(productId, product.price);
-        res.redirect('/cart');
-    })
-    .catch(err => {
-        console.log('Error while deleting from cart : ', err)
-    });
+        .then(product => {
+            Cart.deleteProductById(productId, product.price);
+            res.redirect('/cart');
+        })
+        .catch(err => {
+            console.log('Error while deleting from cart : ', err);
+        });
 };
 exports.getOrders = (req, res, next) => {
 
