@@ -1,11 +1,11 @@
 const Product = require('../models/product');
 
 exports.getAdminProducts = (req, res, next) => {
-    req.user.getProducts()
-        .then((rows) => {
+    Product.fetchAll()
+        .then((products) => {
             res.render('admin/products', {
                 pageTitle: 'Admin Products Page',
-                prods: rows,
+                prods: products,
                 path: '/admin/products',
             });
         })
@@ -24,12 +24,10 @@ exports.getEditProduct = (req, res, next) => {
     const productId = req.params.productId;
     const editMode = req.query.edit;
 
-    req.user.getProducts({ where: { id: productId } })
-    // Product.findByPk(productId)
-        .then((products) => {
-            const product = products[0];
-            if(!product){
-                res.redirect('/')
+    Product.findById(productId)
+        .then((product) => {
+            if (!product) {
+                res.redirect('/');
             }
             res.render('admin/edit-product', {
                 pageTitle: 'Edit Product',
@@ -48,24 +46,30 @@ exports.postEditProduct = (req, res, next) => {
     };
 
     Product
-        .update(product, { where: { id: req.body.productId } })
+        .updateById(req.body.productId, product)
         .then(_response => {
             res.redirect('/');
         });
 };
 exports.postDeleteProduct = (req, res, next) => {
-    Product.destroy({ where: { id: req.body.productId } });
-    res.redirect('/');
+    Product.deleteById(req.body.productId)
+        .then(() => {
+            res.redirect('/');
+        })
+        .catch(err => console.log(err));
 };
 
 exports.postAddProduct = (req, res, next) => {
-    req.user.createProduct({
+    const newProduct = {
         title: req.body.title,
         price: req.body.price,
         description: req.body.description,
         imageUrl: req.body.imageUrl,
-    }).then((insertResponse) => {
-        // console.log('insert response : ', insertResponse);
-        res.redirect('/');
-    });
+    };
+    const product = new Product(newProduct);
+    product.save()
+        .then(result => {
+            res.redirect('/');
+        })
+        .catch(err => console.log(err));
 };
