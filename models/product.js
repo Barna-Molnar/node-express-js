@@ -1,4 +1,4 @@
-const { ObjectId  } = require('mongodb');
+const { ObjectId } = require('mongodb');
 const getDb = require('../utils/database').getDb;
 
 class Product {
@@ -9,7 +9,17 @@ class Product {
         this.imageUrl = imageUrl;
     }
 
-
+    static deleteById(id) {
+        const db = getDb();
+        return db.collection('products')
+            .deleteOne({ _id: new ObjectId(id) })
+            .then((deleteResult) => {
+                console.log(deleteResult);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
     static findById(id) {
         const db = getDb();
         return db.collection('products')
@@ -34,6 +44,17 @@ class Product {
             .catch(err => {
                 console.log(err);
             });
+    }
+
+    static updateById(productId, newValues) {
+        const db = getDb();
+        return db.collection('products')
+            .updateOne({ _id: new ObjectId(productId) }, { $set: newValues })
+            .then(updateResult => {
+                console.log('UpdateResult', updateResult);
+            })
+            .catch(err => console.log(err));
+
     }
 
     save() {
