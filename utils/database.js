@@ -1,6 +1,6 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
-const uri = "mongodb+srv://hanta911:eGDTgOhiaQU1Wm36@node-cluster.lsrn2ml.mongodb.net/?retryWrites=true&w=majority&appName=Node-Cluster";
+const uri = "mongodb+srv://hanta911:Bazdmeg@node-cluster.lsrn2ml.mongodb.net/?retryWrites=true&w=majority&appName=Node-Cluster";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -10,16 +10,35 @@ const client = new MongoClient(uri, {
   }
 });
 
+/** @type {import('mongodb').Db} */
+let db;
+
+/**
+ * Connects to MongoDB and initializes the database connection
+ * @param {function(import('mongodb').MongoClient): void} callBack - Callback function that receives the MongoDB client
+ * @returns {Promise<void>}
+ */
 const mongoConnect = (callBack) => {
     client
     .connect()
     .then(client => {
-        callBack(client)
+        db = client.db()
+        callBack()
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+        console.log('MONGO ERROR:',err)
+    })
 }
 
+/**
+ * Gets the database instance
+ * @returns {import('mongodb').Db} The MongoDB database instance
+ * @throws {Error} If database is not initialized
+ */
+const getDb = () => {
+    if(db) return db
+    throw new Error("no db defined ");
+}
 
-
-
-module.exports= mongoConnect;
+exports.mongoConnect = mongoConnect;
+exports.getDb = getDb;
