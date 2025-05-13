@@ -1,41 +1,51 @@
-const Sequelize = require('sequelize')
-const sequelize = require('../utils/database')
+const { ObjectId  } = require('mongodb');
+const getDb = require('../utils/database').getDb;
 
-/**
- * @typedef {Object} ProductAttributes
- * @property {number} id
- * @property {string} title
- * @property {number} price
- * @property {string} imageUrl
- * @property {string} description
- */
-
-/**
- * @type {import('sequelize').ModelStatic<import('sequelize').Model<ProductAttributes>>}
- */
-const Product = sequelize.define('product', {
-    id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        allowNull: false,
-        primaryKey: true
-    },
-    title: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    price: {
-        type: Sequelize.DOUBLE,
-        allowNull: false
-    },
-    imageUrl: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    description: {
-        type: Sequelize.STRING,
-        allowNull: false
+class Product {
+    constructor({ title, price, description, imageUrl }) {
+        this.price = price;
+        this.title = title;
+        this.description = description;
+        this.imageUrl = imageUrl;
     }
-});
+
+
+    static findById(id) {
+        const db = getDb();
+        return db.collection('products')
+            .find({ _id: new ObjectId(id) })
+            .next()
+            .then((product) => {
+                console.log(product);
+                return product;
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+    static fetchAll() {
+        const db = getDb();
+        return db.collection('products')
+            .find()
+            .toArray()
+            .then((products) => {
+                return products;
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    save() {
+        const db = getDb();
+        return db.collection('products')
+            .insertOne(this)
+            .then(result => {
+                console.log('INSERT RESULT FROM SAVE', result);
+            })
+            .catch(err => console.log(err));
+    }
+
+}
 
 module.exports = Product;

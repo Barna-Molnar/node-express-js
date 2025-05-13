@@ -5,7 +5,7 @@ const path = require('path');
 const connectToMongo = require('./utils/database').mongoConnect
 
 const adminRoutes = require('./routes/admin');
-// const shopRoutes = require('./routes/shop');
+const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
 
 const PORT = process.env.PORT || 8080;
@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/admin', adminRoutes);
-// app.use('/', shopRoutes);
+app.use('/', shopRoutes);
 
 app.use('/', errorController.pageNotFound);
 
