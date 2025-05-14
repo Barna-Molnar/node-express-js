@@ -2,11 +2,12 @@ const { ObjectId } = require('mongodb');
 const getDb = require('../utils/database').getDb;
 
 class Product {
-    constructor({ title, price, description, imageUrl }) {
+    constructor({ title, price, description, imageUrl, userId }) {
         this.price = price;
         this.title = title;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.userId = userId;
     }
 
     static deleteById(id) {
