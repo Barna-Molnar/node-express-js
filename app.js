@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // serve static files
 app.use((req, res, next) => {
     User.findById('682422f1ba6533b6dfe778cc')
         .then(user => {
-            console.log('user from request',JSON.stringify(user))
+            // console.log('user from request',JSON.stringify(user))
             req.user = new User({username: user.username, email: user.email, cart: user.cart, id: user._id }); // store user in all incoming request
             next(); // go on with the next step
         })
