@@ -8,6 +8,7 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
 const User = require('./models/user');
+const mongoose = require('mongoose');
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -22,7 +23,7 @@ app.use((req, res, next) => {
     User.findById('682422f1ba6533b6dfe778cc')
         .then(user => {
             // console.log('user from request',JSON.stringify(user))
-            req.user = new User({username: user.username, email: user.email, cart: user.cart, id: user._id }); // store user in all incoming request
+            req.user = new User({ username: user.username, email: user.email, cart: user.cart, id: user._id }); // store user in all incoming request
             next(); // go on with the next step
         })
         .catch(err => console.log(err));
@@ -33,7 +34,11 @@ app.use('/', shopRoutes);
 
 app.use('/', errorController.pageNotFound);
 
-connectToMongo(() => {
-    console.log('Connected to client... ');
-    app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
-});
+mongoose
+    .connect("mongodb+srv://hanta911:Bazdmeg@node-cluster.lsrn2ml.mongodb.net/?retryWrites=true&w=majority&appName=Node-Cluster")
+    .then(result => {
+        console.log('Connected to client... ');
+        app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
+
+    })
+    .catch(err => { console.log(err); });

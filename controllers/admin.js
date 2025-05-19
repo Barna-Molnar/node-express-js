@@ -58,7 +58,6 @@ exports.postDeleteProduct = (req, res, next) => {
         })
         .catch(err => console.log(err));
 };
-
 exports.postAddProduct = (req, res, next) => {
     const newProduct = {
         title: req.body.title,
