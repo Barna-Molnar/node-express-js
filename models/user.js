@@ -15,7 +15,7 @@ class User {
             .insertOne(this)
             .then(result => {
                 console.log('INSERT RESULT FROM SAVING A USER', result);
-                return result
+                return result;
             })
             .catch(err => console.log(err));
     }
@@ -45,7 +45,7 @@ class User {
             .then(batchFindResult => {
                 const enhancedCartItems = batchFindResult.map(prod => {
                     const currentProductInCart = this.cart.items.find(item => item.productId === prod._id.toString());
-                    
+
                     if (!currentProductInCart) return null;
 
                     return {
@@ -59,10 +59,26 @@ class User {
             });
     }
 
-    deleteFromCartById (productId) {
+    deleteFromCartById(productId) {
         const db = getDb();
         const updatedCart = { items: this.cart.items.filter(item => item.productId !== productId) };
         return db.collection('users').updateOne({ _id: new ObjectId(this._id) }, { $set: { cart: updatedCart } });
+    }
+
+    addOrder() {
+        const db = getDb();
+        const emptyCart = { items: [] };
+
+        return db
+            .collection('orders')
+            .insertOne(this.cart).then(result => {
+                //clear locally
+                this.cart = emptyCart;
+                // clear in db
+                return db
+                    .collection('users')
+                    .updateOne({ _id: new ObjectId(this._id) }, { $set: { cart: emptyCart } });
+            });
     }
 
     static findById(userId) {
