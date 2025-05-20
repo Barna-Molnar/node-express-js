@@ -83,7 +83,6 @@ exports.postCreateOrder = (req, res, next) => {
 };
 
 exports.postDeleteProductFromCart = (req, res, next) => {
-    console.log(req.body.productId);
     req.user.deleteFromCartById(req.body.productId)
         .then(_deletionResult => {
             console.log('Product succesfully has beed deleted from cart ...');

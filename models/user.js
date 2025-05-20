@@ -25,7 +25,7 @@ userSchema.methods.addToCart = function (productId) {
     const toBeUpdatedCartItems = [...this.cart.items];
 
     const searchedItemIndex = this.cart.items.findIndex(item => item.productId.toString() === productId.toString());
-    
+
     if (searchedItemIndex >= 0) {
         toBeUpdatedCartItems[searchedItemIndex].quantity += 1;
     } else {
@@ -34,10 +34,14 @@ userSchema.methods.addToCart = function (productId) {
 
     const updatedCart = { items: toBeUpdatedCartItems };
 
-    this.cart = updatedCart
+    this.cart = updatedCart;
     return this.save();
+};
 
-    // return db.collection('users').updateOne({ _id: new ObjectId(this._id) }, { $set: { cart: updatedCart } });
+userSchema.methods.deleteFromCartById = function (productId) {
+    const filteredItems = this.cart.items.filter(item => item.productId.toString() !== productId.toString());
+    this.cart.items = filteredItems;
+    return this.save()
 };
 
 module.exports = mongoose.model('User', userSchema);
