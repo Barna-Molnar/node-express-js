@@ -19,7 +19,6 @@ exports.getProduct = (req, res, next) => {
     Product
         .findById(productId)
         .then((product) => {
-            console.log(product)
             res.render('shop/product-detail', {
                 product: product,
                 pageTitle: product.title,
@@ -57,16 +56,21 @@ exports.postCart = (req, res, next) => {
         .catch(err => console.log(err));
 };
 
-exports.getCart = (req, res, next) => {
-    req.user.getCart()
-        .then(cartItems => {
-            res.render('shop/cart', {
-                pageTitle: 'Your Cart',
-                path: '/cart',
-                products: cartItems,
-                totalPrice: 0,
-            });
+exports.getCart = async (req, res, next) => {
+    try {
+        const pupaltedUserObject = await req.user.populate('cart.items.productId'); // this populates in-place
+
+        // console.log('pupaltedUserObject.cart.items', pupaltedUserObject.cart.items);
+
+        res.render('shop/cart', {
+            pageTitle: 'Your Cart',
+            path: '/cart',
+            products: pupaltedUserObject.cart.items,
+            totalPrice: 0,
         });
+    } catch (err) {
+        next(err);
+    }
 };
 
 exports.postCreateOrder = (req, res, next) => {
