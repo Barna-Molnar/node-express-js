@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs/promises');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -33,23 +34,30 @@ app.use('/', shopRoutes);
 
 app.use('/', errorController.pageNotFound);
 
-mongoose
-    .connect("mongodb+srv://hanta911:Bazdmeg@node-cluster.lsrn2ml.mongodb.net/shop?retryWrites=true&w=majority&appName=Node-Cluster")
-    .then(result => {
-        console.log('Connected to client... ');
-        User.findOne()
-            .then(user => {
-                if (!user) {
-                    const user = new User({
-                        name: 'Barna M',
-                        email: 'm.brown@mongoose.com',
-                        cart: { items: [] }
-                    });
-                    user.save();
-                }
-            });
-
-        app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
-
-    })
-    .catch(err => { console.log(err); });
+async function start() {
+    try {
+      const configPath = path.join(__dirname, 'config.json');
+      const fileContent = await fs.readFile(configPath, 'utf-8');
+      const mongoDb_uri = JSON.parse(fileContent).mongoDb_uri;
+  
+      console.log("Connecting to MongoDB...");
+     
+      await mongoose.connect(mongoDb_uri);
+     
+      const user  = await User.findOne()
+      if (!user) {
+        const user = new User({
+            name: 'Barna M',
+            email: 'm.brown@mongoose.com',
+            cart: { items: [] }
+        });
+        user.save();
+    }
+      console.log(`Connected to MongoDB with user: ${user.name}`);
+      app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
+    } catch (err) {
+      console.error("Failed to connect to MongoDB:", err);
+    }
+  }
+  
+  start();
