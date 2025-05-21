@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
 
 exports.getProducts = (req, res, next) => {
     Product
@@ -29,7 +30,6 @@ exports.getProduct = (req, res, next) => {
             console.log('Error while fetching product : ', err);
         });
 };
-
 exports.getIndex = (req, res, next) => {
     Product
         .find()
@@ -44,7 +44,6 @@ exports.getIndex = (req, res, next) => {
             console.log('Error while fetching products : ', err);
         });
 };
-
 exports.postCart = (req, res, next) => {
     const productId = req.body.productId;
 
@@ -55,12 +54,9 @@ exports.postCart = (req, res, next) => {
         })
         .catch(err => console.log(err));
 };
-
 exports.getCart = async (req, res, next) => {
     try {
         const pupaltedUserObject = await req.user.populate('cart.items.productId'); // this populates in-place
-
-        // console.log('pupaltedUserObject.cart.items', pupaltedUserObject.cart.items);
 
         res.render('shop/cart', {
             pageTitle: 'Your Cart',
@@ -73,13 +69,26 @@ exports.getCart = async (req, res, next) => {
     }
 };
 
-exports.postCreateOrder = (req, res, next) => {
-    req.user
-        .addOrder()
-        .then(() => {
-            res.redirect('/orders');
+exports.postCreateOrder = async (req, res, next) => {
+    try {
+        const pupaltedUserObject = await req.user.populate('cart.items.productId');
+        const order = new Order({
+            user: {
+                name: req.user.name,
+                userId: req.user
+            },
+            products: pupaltedUserObject.cart.items.map(item => ({
+                quantity: item.quantity,
+                productId: item.productId
+            }))
         });
 
+        await order.save();
+        res.redirect('/orders');
+
+    } catch (error) {
+        console.log('ERROR', error)
+    }
 };
 
 exports.postDeleteProductFromCart = (req, res, next) => {
@@ -90,20 +99,21 @@ exports.postDeleteProductFromCart = (req, res, next) => {
         })
         .catch(err => console.log(err));
 };
-
 exports.getOrders = (req, res, next) => {
-
-    req.user
-        .getOrders()
-        .then(orders => {
+    Order
+        .find()
+        // .select()
+        .populate('products.productId')
+        .then((orders) => {
             res.render('shop/orders', {
                 pageTitle: 'Your Orders',
                 path: '/orders',
                 orders: orders
             });
+        })
+        .catch(err => {
+            console.log('Error while fetching products : ', err);
         });
-
-
 };
 exports.getCheckout = (req, res, next) => {
 

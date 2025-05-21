@@ -6,6 +6,7 @@ exports.getAdminProducts = (req, res, next) => {
         // .select()
         .populate('userId')
         .then((products) => {
+            // console.log(products)
             res.render('admin/products', {
                 pageTitle: 'Admin Products Page',
                 prods: products,
