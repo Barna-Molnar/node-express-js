@@ -71,23 +71,37 @@ exports.getCart = async (req, res, next) => {
 
 exports.postCreateOrder = async (req, res, next) => {
     try {
-        const pupaltedUserObject = await req.user.populate('cart.items.productId');
+        const pupalatedUserObject = await req.user.populate('cart.items.productId');
+        // console.log(pupalatedUserObject.cart.items);
         const order = new Order({
             user: {
                 name: req.user.name,
                 userId: req.user
             },
-            products: pupaltedUserObject.cart.items.map(item => ({
-                quantity: item.quantity,
-                productId: item.productId
-            }))
+            products: pupalatedUserObject.cart.items.map(item => {
+                const productDetails = item.productId;
+                const embededProduct = {
+                    _id: productDetails._id,
+                    title: productDetails.title,
+                    price: productDetails.price,
+                    description: productDetails.description,
+                    imageUrl: productDetails.imageUrl,
+                    userId: productDetails.userId
+
+                };
+                return {
+                    quantity: item.quantity,
+                    product: embededProduct
+                };
+            })
         });
 
         await order.save();
+        await req.user.clearCart();
         res.redirect('/orders');
 
     } catch (error) {
-        console.log('ERROR', error)
+        console.log('ERROR', error);
     }
 };
 
@@ -103,8 +117,9 @@ exports.getOrders = (req, res, next) => {
     Order
         .find()
         // .select()
-        .populate('products.productId')
+        // .populate('products.productId')
         .then((orders) => {
+            console.log(orders[0])
             res.render('shop/orders', {
                 pageTitle: 'Your Orders',
                 path: '/orders',
