@@ -115,7 +115,7 @@ exports.postDeleteProductFromCart = (req, res, next) => {
 };
 exports.getOrders = (req, res, next) => {
     Order
-        .find()
+        .find({'user.userId': req.user._id})
         // .select()
         // .populate('products.productId')
         .then((orders) => {
