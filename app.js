@@ -5,6 +5,7 @@ const fs = require('fs/promises');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 const errorController = require('./controllers/error');
 // const User = require('./models/user');
 const mongoose = require('mongoose');
@@ -31,33 +32,34 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
+app.use('/', authRoutes);
 
 app.use('/', errorController.pageNotFound);
 
 async function start() {
     try {
-      const configPath = path.join(__dirname, 'config.json');
-      const fileContent = await fs.readFile(configPath, 'utf-8');
-      const mongoDb_uri = JSON.parse(fileContent).mongoDb_uri;
-  
-      console.log("Connecting to MongoDB...");
-     
-      await mongoose.connect(mongoDb_uri);
-     
-      const user  = await User.findOne()
-      if (!user) {
-        const user = new User({
-            name: 'Barna M',
-            email: 'm.brown@mongoose.com',
-            cart: { items: [] }
-        });
-        user.save();
-    }
-      console.log(`Connected to MongoDB with user: ${user.name}`);
-      app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
+        const configPath = path.join(__dirname, 'config.json');
+        const fileContent = await fs.readFile(configPath, 'utf-8');
+        const mongoDb_uri = JSON.parse(fileContent).mongoDb_uri;
+
+        console.log("Connecting to MongoDB...");
+
+        await mongoose.connect(mongoDb_uri);
+
+        const user = await User.findOne();
+        if (!user) {
+            const user = new User({
+                name: 'Barna M',
+                email: 'm.brown@mongoose.com',
+                cart: { items: [] }
+            });
+            user.save();
+        }
+        console.log(`Connected to MongoDB with user: ${user.name}`);
+        app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
     } catch (err) {
-      console.error("Failed to connect to MongoDB:", err);
+        console.error("Failed to connect to MongoDB:", err);
     }
-  }
-  
-  start();
+}
+
+start();
