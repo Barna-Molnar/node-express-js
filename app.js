@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs/promises');
+const session = require('express-session');
+
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -19,6 +21,7 @@ app.set('views', 'views'); // set the views directory
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public'))); // serve static files
+app.use(session({ secret: 'my secret', resave: false, saveUninitialized: false }));
 
 app.use((req, res, next) => {
     User.findById('682ad496608187c07bf3ca42')
