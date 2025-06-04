@@ -47,9 +47,14 @@ async function start() {
 
         // Fetch user once and attach to request
         app.use(async (req, res, next) => {
+            console.log('app.js .... req.session.user', req.session.user)
+            if(!req.session.user) {
+                console.log('app.js .... if !req.session.user then call next ()')
+                return next();
+            }
             try {
                 // Ensure a user exists, if not create one for development
-                let user = await User.findById('682ad496608187c07bf3ca42');
+                let user = await User.findById(req.session.user._id);
                 console.log(`Found the user: ${user.name}`);
                 if (!user) {
                     console.warn("User '682ad496608187c07bf3ca42' not found. Creating a new one.");

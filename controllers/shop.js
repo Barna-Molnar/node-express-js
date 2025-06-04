@@ -9,7 +9,7 @@ exports.getProducts = (req, res, next) => {
                 prods: products,
                 pageTitle: 'All Products',
                 path: '/products',
-                isLoggedIn: req.isLoggedIn
+                isLoggedIn: req.session.isLoggedIn
             });
         })
         .catch(err => {
@@ -40,7 +40,7 @@ exports.getIndex = (req, res, next) => {
                 prods: rows,
                 pageTitle: 'Shop',
                 path: '/',
-                isLoggedIn: req.isLoggedIn
+                isLoggedIn: req.session.isLoggedIn
             });
         })
         .catch(err => {
@@ -66,7 +66,7 @@ exports.getCart = async (req, res, next) => {
             path: '/cart',
             products: pupaltedUserObject.cart.items,
             totalPrice: 0,
-            isLoggedIn: req.isLoggedIn
+            isLoggedIn: req.session.isLoggedIn
         });
     } catch (err) {
         next(err);
@@ -128,7 +128,7 @@ exports.getOrders = (req, res, next) => {
                 pageTitle: 'Your Orders',
                 path: '/orders',
                 orders: orders,
-                isLoggedIn: req.isLoggedIn
+                isLoggedIn: req.session.isLoggedIn
             });
         })
         .catch(err => {
@@ -140,7 +140,7 @@ exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
         pageTitle: 'Checkout',
         path: '/checkout',
-        isLoggedIn: req.isLoggedIn
+        isLoggedIn: req.session.isLoggedIn
     });
 
 };
