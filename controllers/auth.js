@@ -17,10 +17,10 @@ exports.postSignup = async (req, res, next) => {
 
     try {
         const exisingUser = await User.findOne({ email: email });
-        if (exisingUser) { 
-            console.log('Error: user already exist :', exisingUser)
+        if (exisingUser) {
+            console.log('Error: user already exist :', exisingUser);
             return res.redirect('/signup');
-         }
+        }
 
         const hashedPassword = await bcrypt.hash(password, 12);
         const user = new User({ email, password: hashedPassword, cart: { items: [] } });
@@ -29,7 +29,7 @@ exports.postSignup = async (req, res, next) => {
         res.redirect('/login');
 
     } catch (error) {
-        console.log('Error in postSignup', error)
+        console.log('Error in postSignup', error);
     }
 };
 
@@ -41,22 +41,37 @@ exports.getLogin = (req, res, next) => {
     });
 };
 
-exports.postLogin = (req, res, next) => {
-    User.findById('682ad496608187c07bf3ca42')
-        .then(user => {
-            console.log('postLogin....');
-            console.log({ user });
-            req.session.isLoggedIn = true;
-            req.session.user = user;
-            res.redirect('/');
-        })
-        .catch(err => console.log(err));
+exports.postLogin = async (req, res, next) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    try {
+        const exisingUser = await User.findOne({ email: email });
+        if (!exisingUser) {
+            return res.redirect('/logon');
+        }
+        console.log({ exisingUser });
+        const isPasswordValid = await bcrypt.compare(password, exisingUser.password);
+        console.log({ isPasswordValid });
+        if (!isPasswordValid) {
+            return res.redirect('/login');
+        }
+
+        req.session.isLoggedIn = true;
+        req.session.user = exisingUser;
+        res.redirect('/');
+
+    } catch (error) {
+        console.log(err);
+    }
 };
 
 exports.postLogout = (req, res, next) => {
+    console.log('destroy session...');
+    
     req.session.destroy((err) => {
         console.log(err);
-        console.log('destroy session...');
+        console.log('session has been destroyed');
         res.redirect('/login');
     });
 };
