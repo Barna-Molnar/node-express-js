@@ -45,37 +45,6 @@ async function start() {
             store: store
         }));
 
-        // Fetch user once and attach to request
-        app.use(async (req, res, next) => {
-            console.log('app.js .... req.session.user', req.session.user)
-            if(!req.session.user) {
-                console.log('app.js .... if !req.session.user then call next ()')
-                return next();
-            }
-            try {
-                // Ensure a user exists, if not create one for development
-                let user = await User.findById(req.session.user._id);
-                console.log(`Found the user: ${user.name}`);
-                if (!user) {
-                    console.warn("User '682ad496608187c07bf3ca42' not found. Creating a new one.");
-                    user = new User({
-                        _id: '682ad496608187c07bf3ca42',
-                        name: 'Barna M',
-                        email: 'm.brown@mongoose.com',
-                        cart: { items: [] }
-                    });
-                    await user.save(); // Await saving the new user
-                    console.log(`Created the user: ${user.name}`);
-                }
-                req.user = user;
-                console.log(`Connected to MongoDB with user: ${user.name}`);
-                next();
-            } catch (err) {
-                console.error("Error fetching or creating user:", err);
-                next(err); // Pass error to Express error handler
-            }
-        });
-
         app.use('/admin', adminRoutes);
         app.use('/', shopRoutes);
         app.use('/', authRoutes);
