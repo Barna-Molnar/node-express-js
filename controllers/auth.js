@@ -37,7 +37,6 @@ exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
         pageTitle: 'Login',
         path: '/login',
-        isLoggedIn: req.session.isLoggedIn
     });
 };
 
@@ -48,7 +47,7 @@ exports.postLogin = async (req, res, next) => {
     try {
         const exisingUser = await User.findOne({ email: email });
         if (!exisingUser) {
-            return res.redirect('/logon');
+            return res.redirect('/login');
         }
         console.log({ exisingUser });
         const isPasswordValid = await bcrypt.compare(password, exisingUser.password);

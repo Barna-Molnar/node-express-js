@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs/promises');
 const session = require('express-session');
 const MongoDbStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -15,6 +16,7 @@ const User = require('./models/user');
 
 const PORT = process.env.PORT || 8080;
 const app = express();
+const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views'); // set the views directory
@@ -44,6 +46,27 @@ async function start() {
             saveUninitialized: false,
             store: store
         }));
+
+        app.use(csrfProtection);
+
+        app.use(async (req, res, next) => {
+            if (!req.session.user) {
+              return next();
+            }
+            try {
+                const user = await User.findById(req.session.user._id);
+                req.user = user;
+                next();
+            } catch (err) {
+                console.log(err);
+            }
+          });
+          
+          app.use((req, res, next) => {
+            res.locals.isLoggedIn = req.session.isLoggedIn;
+            res.locals.csrfToken = req.csrfToken();
+            next();
+          });
 
         app.use('/admin', adminRoutes);
         app.use('/', shopRoutes);
