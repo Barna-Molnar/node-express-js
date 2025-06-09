@@ -2,10 +2,12 @@ const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 
 exports.getSignup = (req, res, next) => {
+    const errorMsg = req.flash('error')[0];
     res.render('auth/signup', {
         pageTitle: 'Signup',
         path: '/signup',
-        isLoggedIn: false
+        isLoggedIn: false,
+        errorMessage: errorMsg,
     });
 };
 
@@ -18,7 +20,8 @@ exports.postSignup = async (req, res, next) => {
     try {
         const exisingUser = await User.findOne({ email: email });
         if (exisingUser) {
-            console.log('Error: user already exist :', exisingUser);
+            req.flash('error', 'User already exist..., please choose another email!');
+            await req.session.save();
             return res.redirect('/signup');
         }
 
@@ -55,7 +58,6 @@ exports.postLogin = async (req, res, next) => {
         }
 
         const isPasswordValid = await bcrypt.compare(password, exisingUser.password);
-        console.log({ isPasswordValid });
         if (!isPasswordValid) {
             req.flash('error', 'Invalid password');
             await req.session.save();
