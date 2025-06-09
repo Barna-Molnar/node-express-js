@@ -5,6 +5,7 @@ const fs = require('fs/promises');
 const session = require('express-session');
 const MongoDbStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -48,6 +49,7 @@ async function start() {
         }));
 
         app.use(csrfProtection);
+        app.use(flash());
 
         app.use(async (req, res, next) => {
             if (!req.session.user) {

@@ -75,7 +75,7 @@ exports.postCreateOrder = async (req, res, next) => {
         // console.log(pupalatedUserObject.cart.items);
         const order = new Order({
             user: {
-                name: req.user.name,
+                email: req.user.email,
                 userId: req.user
             },
             products: pupalatedUserObject.cart.items.map(item => {

@@ -34,9 +34,11 @@ exports.postSignup = async (req, res, next) => {
 };
 
 exports.getLogin = (req, res, next) => {
+    const errorMsg = req.flash('error')[0];
     res.render('auth/login', {
         pageTitle: 'Login',
         path: '/login',
+        errorMessage: errorMsg,
     });
 };
 
@@ -47,12 +49,16 @@ exports.postLogin = async (req, res, next) => {
     try {
         const exisingUser = await User.findOne({ email: email });
         if (!exisingUser) {
+            req.flash('error', 'Invalid user');
+            await req.session.save();
             return res.redirect('/login');
         }
-        console.log({ exisingUser });
+
         const isPasswordValid = await bcrypt.compare(password, exisingUser.password);
         console.log({ isPasswordValid });
         if (!isPasswordValid) {
+            req.flash('error', 'Invalid password');
+            await req.session.save();
             return res.redirect('/login');
         }
 

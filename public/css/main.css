@@ -229,7 +229,18 @@ form {
   .main-header__nav {
     display: flex;
   }
-
+.user-message {
+    margin: auto;
+    width: 20%;
+    boreder: 1px solid #00695c;
+    padding: 1rem;
+    background-color: #00452c;
+    border-radius: 3px;
+}
+.user-message--error {
+    boreder: 1px solid #ff0000;
+    background-color: #d50909;
+}
   #side-menu-toggle {
     display: none;
   }
