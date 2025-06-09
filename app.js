@@ -53,7 +53,7 @@ async function start() {
 
         app.use(async (req, res, next) => {
             if (!req.session.user) {
-              return next();
+                return next();
             }
             try {
                 const user = await User.findById(req.session.user._id);
@@ -62,13 +62,13 @@ async function start() {
             } catch (err) {
                 console.log(err);
             }
-          });
-          
-          app.use((req, res, next) => {
+        });
+
+        app.use((req, res, next) => {
             res.locals.isLoggedIn = req.session.isLoggedIn;
             res.locals.csrfToken = req.csrfToken();
             next();
-          });
+        });
 
         app.use('/admin', adminRoutes);
         app.use('/', shopRoutes);

@@ -1,6 +1,13 @@
-const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
 
+const User = require('../models/user');
+const transporter = nodemailer.createTransport(sendgridTransport({
+    auth: {
+        api_key: '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'
+    }
+}));
 exports.getSignup = (req, res, next) => {
     const errorMsg = req.flash('error')[0];
     res.render('auth/signup', {
@@ -29,6 +36,18 @@ exports.postSignup = async (req, res, next) => {
         const user = new User({ email, password: hashedPassword, cart: { items: [] } });
 
         await user.save();
+        try {
+            const emailSendStatus = await transporter.sendMail({
+                to: email,
+                from: 'hanta911@gmail.com',
+                subject: 'Signup succeeded!',
+                html: '<h1>You successfully signed up!</h1>'
+            });
+            console.log({ emailSendStatus });
+        } catch (error) {
+            console.log('Error by sending mail: ', error);
+        }
+
         res.redirect('/login');
 
     } catch (error) {
@@ -75,7 +94,7 @@ exports.postLogin = async (req, res, next) => {
 
 exports.postLogout = (req, res, next) => {
     console.log('destroy session...');
-    
+
     req.session.destroy((err) => {
         console.log(err);
         console.log('session has been destroyed');
