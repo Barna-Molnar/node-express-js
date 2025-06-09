@@ -231,15 +231,17 @@ form {
   }
 .user-message {
     margin: auto;
-    width: 20%;
+    width: 30%;
     boreder: 1px solid #00695c;
     padding: 1rem;
     background-color: #00452c;
     border-radius: 3px;
+    text-align: center;
 }
 .user-message--error {
     boreder: 1px solid #ff0000;
     background-color: #d50909;
+    color: whitesmoke;
 }
   #side-menu-toggle {
     display: none;
