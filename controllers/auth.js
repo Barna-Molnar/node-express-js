@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
+const crypto = require('crypto');
 
 const User = require('../models/user');
 const transporter = nodemailer.createTransport(sendgridTransport({
@@ -99,5 +100,52 @@ exports.postLogout = (req, res, next) => {
         console.log(err);
         console.log('session has been destroyed');
         res.redirect('/login');
+    });
+};
+
+exports.getResetPassword = (req, res, next) => {
+    const errorMsg = req.flash('error')[0];
+    res.render('auth/reset-password', {
+        pageTitle: 'Reset Password',
+        path: '/reset-password',
+        errorMessage: errorMsg,
+    });
+};
+exports.postResetPassword = (req, res, next) => {
+    const email = req.body.email;
+    const errorMsg = req.flash('error')[0];
+    crypto.randomBytes(32, (err, buffer) => {
+        if (err) {
+            console.log('randomBytes Err', err);
+            res.redirect('/reset-password');
+        }
+        const token = buffer.toString('hex');
+        console.log('randomBytes token', token);
+        User.findOne({ email: email })
+            .then(user => {
+                if (!user) {
+                    req.flash('error', 'No user with that email found');
+                    return res.redirect('/reset-password');
+                }
+                console.log('User.findOne', user);
+                user.resetToken = token;
+                user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
+                return user.save();
+            })
+            .then(result => {
+                res.redirect('/');
+                transporter.sendMail({
+                    to: email,
+                    from: 'hanta911@gmail.com',
+                    subject: 'Reset Password!',
+                    html: `
+                <h1>You requested resetting password!</h1>
+                <p>Click this link to set a new password: <a href="http://localhost:8080/reset-password/${token}">Reset Password</a></p>
+                <p>If you didn't request this, please ignore this email.</p>
+                `
+                });
+
+            })
+            .catch(err => console.log(err));
     });
 };
