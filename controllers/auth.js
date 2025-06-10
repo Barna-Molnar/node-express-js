@@ -149,3 +149,56 @@ exports.postResetPassword = (req, res, next) => {
             .catch(err => console.log(err));
     });
 };
+
+exports.getUpdatePassword = (req, res, next) => {
+    const errorMsg = req.flash('error')[0];
+    const token = req.params.token;
+
+    User
+        .findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+        .then(user => {
+            if (!user) {
+                req.flash('error', 'Invalid or expired token');
+                return res.redirect('/reset-password');
+            }
+            res.render('auth/update-password', {
+                pageTitle: 'Update Password',
+                path: '/reset-password',
+                errorMessage: errorMsg,
+                userId: user._id.toString(),
+                passwordToken: token,
+            });
+        })
+        .catch(err => console.log(err));
+};
+
+exports.postUpdatePassword = (req, res, next) => {
+    const errorMsg = req.flash('error')[0];
+    const userId = req.body.userId;
+    const newPassword = req.body.password;
+    const token = req.body.passwordToken;
+    let tobeUpdateUser;
+
+    console.log('postUpdatePassword: ', { userId, newPassword });
+    User
+        .findOne({ _id: userId, resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+        .then(user => {
+            if (!user) {
+                req.flash('error', 'Expired token, please request a new password reset');
+                return res.redirect('/reset-password');
+            }
+            tobeUpdateUser = user;
+            return bcrypt.hash(newPassword, 12);
+        })
+        .then(hashedPassword => {
+            tobeUpdateUser.password = hashedPassword;
+            tobeUpdateUser.resetToken = undefined;
+            tobeUpdateUser.resetTokenExpiration = undefined;
+            return tobeUpdateUser.save();
+        })
+        .then(success => {
+            console.log('Updating password was succesful');
+            res.redirect('/login');
+        })
+        .catch(err => console.log(err));
+};
