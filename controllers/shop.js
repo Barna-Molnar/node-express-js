@@ -31,6 +31,7 @@ exports.getProduct = (req, res, next) => {
         });
 };
 exports.getIndex = (req, res, next) => {
+    const errorMsg = req.flash('error')[0];
     Product
         .find()
         .then((rows) => {
@@ -38,6 +39,7 @@ exports.getIndex = (req, res, next) => {
                 prods: rows,
                 pageTitle: 'Shop',
                 path: '/',
+                errorMessage: errorMsg,
             });
         })
         .catch(err => {
