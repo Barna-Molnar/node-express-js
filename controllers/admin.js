@@ -2,7 +2,7 @@ const Product = require('../models/product');
 
 exports.getAdminProducts = (req, res, next) => {
     Product
-        .find()
+        .find({ userId: req.user._id })
         // .select()
         .populate('userId')
         .then((products) => {
@@ -41,24 +41,24 @@ exports.getEditProduct = (req, res, next) => {
             });
         });
 };
-exports.postEditProduct = (req, res, next) => {
-    Product
-        .findById(req.body.productId)
-        .then(product => {
-            product.title = req.body.title;
-            product.price = req.body.price;
-            product.description = req.body.description;
-            product.imageUrl = req.body.imageUrl;
+exports.postEditProduct = async (req, res, next) => {
+    const existingProduct = await Product.findById(req.body.productId);
 
-            return product.save();
-        })
-        .then(_response => {
-            res.redirect('/');
-        });
+    if (existingProduct.userId.toString() !== req.user._id.toString()) {
+        req.flash('error', 'Action Denied! You tried to edit a Product which was not created by you!');
+        return res.redirect('/');
+    }
+    existingProduct.title = req.body.title;
+    existingProduct.price = req.body.price;
+    existingProduct.description = req.body.description;
+    existingProduct.imageUrl = req.body.imageUrl;
+
+    await existingProduct.save();
+    res.redirect('/');
 };
+
 exports.postDeleteProduct = (req, res, next) => {
-    Product
-        .findByIdAndDelete(req.body.productId)
+    Product.deleteOne({ _id: req.body.productId, userId: req.user._id })
         .then(() => {
             res.redirect('/');
         })
