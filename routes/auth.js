@@ -1,13 +1,16 @@
 const express = require('express');
-const authController = require('../controllers/auth');
+const { check } = require('express-validator');
 
+const authController = require('../controllers/auth');
 const router = express.Router();
+
+const emailValidation = () => [check('email').isEmail().withMessage('Please enter a valid email')];
 
 router.get('/login', authController.getLogin);
 router.post('/login', authController.postLogin);
 
 router.get('/signup', authController.getSignup);
-router.post('/signup', authController.postSignup);
+router.post('/signup', emailValidation(), authController.postSignup);
 
 router.post('/logout', authController.postLogout);
 

@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
 const crypto = require('crypto');
+const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
 const transporter = nodemailer.createTransport(sendgridTransport({
@@ -9,6 +10,7 @@ const transporter = nodemailer.createTransport(sendgridTransport({
         api_key: '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'
     }
 }));
+
 exports.getSignup = (req, res, next) => {
     const errorMsg = req.flash('error')[0];
     res.render('auth/signup', {
@@ -23,7 +25,16 @@ exports.postSignup = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     const confirmConfirm = req.body.confirmPassword;
-    console.log({ email, password, confirmConfirm });
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/signup', {
+            pageTitle: 'Signup',
+            path: '/signup',
+            isLoggedIn: false,
+            errorMessage: errors.array()[0].msg,
+        });
+    }
 
     try {
         const exisingUser = await User.findOne({ email: email });
