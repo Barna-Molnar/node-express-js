@@ -15,6 +15,7 @@ const errorController = require('./controllers/error');
 const mongoose = require('mongoose');
 const User = require('./models/user');
 
+global.__rootdir = __dirname; // A common convention is `__basedir` or `__rootdir`
 const PORT = process.env.PORT || 8080;
 const app = express();
 const csrfProtection = csrf();
