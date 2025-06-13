@@ -18,7 +18,6 @@ exports.getSignup = (req, res, next) => {
 exports.postSignup = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-    const confirmConfirm = req.body.confirmPassword;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -31,13 +30,6 @@ exports.postSignup = async (req, res, next) => {
     }
 
     try {
-        const exisingUser = await User.findOne({ email: email });
-        if (exisingUser) {
-            req.flash('error', 'User already exist..., please choose another email!');
-            await req.session.save();
-            return res.redirect('/signup');
-        }
-
         const hashedPassword = await bcrypt.hash(password, 12);
         const user = new User({ email, password: hashedPassword, cart: { items: [] } });
 
