@@ -6,12 +6,19 @@ const router = express.Router();
 
 const emailValidation = () => [check('email').isEmail().withMessage('Please enter a valid email')];
 const passwordValidation = () => [body('password').isLength({ min: 5 }).withMessage('Password is not long enough!')];
+const confirmedPasswordValidation = () => [
+    body('password').custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error('Passwords have to match!');
+        }
+        return true;
+    })];
 
 router.get('/login', authController.getLogin);
 router.post('/login', authController.postLogin);
 
 router.get('/signup', authController.getSignup);
-router.post('/signup', emailValidation(), passwordValidation(), authController.postSignup);
+router.post('/signup', emailValidation(), passwordValidation(), confirmedPasswordValidation(), authController.postSignup);
 
 router.post('/logout', authController.postLogout);
 
