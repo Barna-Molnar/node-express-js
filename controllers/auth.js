@@ -12,21 +12,27 @@ exports.getSignup = (req, res, next) => {
         path: '/signup',
         isLoggedIn: false,
         errorMessage: errorMsg,
+        oldInput: { email: '', password: '', confirmPassword: '' }
     });
 };
 
 exports.postSignup = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).render('auth/signup', {
-            pageTitle: 'Signup',
-            path: '/signup',
-            isLoggedIn: false,
-            errorMessage: errors.array()[0].msg,
-        });
+        return (
+            res.status(422)
+                .render('auth/signup', {
+                    pageTitle: 'Signup',
+                    path: '/signup',
+                    isLoggedIn: false,
+                    errorMessage: errors.array()[0].msg,
+                    oldInput: { email, password, confirmPassword }
+                })
+        );
     }
 
     try {
