@@ -21,6 +21,10 @@
 .form-control textarea:focus {
   outline-color: #00695c;
 }
+.form-control input.invalid {
+    border: 2px solid red;
+    border-radius: 4px;
+}
 
 .login-form {
     width: 20rem;
