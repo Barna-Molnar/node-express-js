@@ -1,4 +1,3 @@
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 
@@ -12,7 +11,8 @@ exports.getSignup = (req, res, next) => {
         path: '/signup',
         isLoggedIn: false,
         errorMessage: errorMsg,
-        oldInput: { email: '', password: '', confirmPassword: '' }
+        oldInput: { email: '', password: '', confirmPassword: '' },
+        errors: [],
     });
 };
 
@@ -30,7 +30,8 @@ exports.postSignup = async (req, res, next) => {
                     path: '/signup',
                     isLoggedIn: false,
                     errorMessage: errors.array()[0].msg,
-                    oldInput: { email, password, confirmPassword }
+                    oldInput: { email, password, confirmPassword },
+                    errors: errors.array()
                 })
         );
     }
@@ -66,26 +67,28 @@ exports.getLogin = (req, res, next) => {
         pageTitle: 'Login',
         path: '/login',
         errorMessage: errorMsg,
+        oldInput: { email: '', password: '' },
+        errors: [],
     });
 };
 
 exports.postLogin = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
+    const errors = validationResult(req);
 
     try {
-        const exisingUser = await User.findOne({ email: email });
-        if (!exisingUser) {
-            req.flash('error', 'Invalid user');
-            await req.session.save();
-            return res.redirect('/login');
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, exisingUser.password);
-        if (!isPasswordValid) {
-            req.flash('error', 'Invalid password');
-            await req.session.save();
-            return res.redirect('/login');
+        if (!errors.isEmpty()) {
+            return (
+                res.status(422)
+                    .render('auth/login', {
+                        pageTitle: 'Login',
+                        path: '/login',
+                        errorMessage: errors.array()[0].msg,
+                        oldInput: { email, password },
+                        errors: errors.array()
+                    })
+            );
         }
 
         req.session.isLoggedIn = true;
@@ -93,7 +96,7 @@ exports.postLogin = async (req, res, next) => {
         res.redirect('/');
 
     } catch (error) {
-        console.log(err);
+        console.log(error);
     }
 };
 
