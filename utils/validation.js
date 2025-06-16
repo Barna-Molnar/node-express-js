@@ -6,7 +6,9 @@ const User = require('../models/user');
 const passwordValidation_signup = () => [
     body('password')
         .isLength({ min: 5 })
+        .trim()
         .withMessage('Password is not long enough!')
+
 ];
 
 const emailValidation_signup = () => [
@@ -17,6 +19,7 @@ const emailValidation_signup = () => [
                 throw new Error('User already exist..., please choose another email!');
             }
         })
+        .normalizeEmail()
 ];
 
 const confirmedPasswordValidation_singup = () => [
@@ -25,11 +28,15 @@ const confirmedPasswordValidation_singup = () => [
             throw new Error('Passwords have to match!');
         }
         return true;
-    })];
+    })
+    .trim()
+];
 
 const userValidation_login = () => [
     body('email').notEmpty().withMessage('Email is required.'),
-    body('password').notEmpty().withMessage('Password is required.'),
+    body('email').isEmail().normalizeEmail().withMessage('Email has to be valid!'),
+    
+    body('password').notEmpty().trim().withMessage('Password is required.'),
 
     body()
         .custom(async ({ email, password }, _) => {

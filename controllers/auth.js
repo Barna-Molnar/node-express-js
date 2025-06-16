@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
@@ -62,11 +63,10 @@ exports.postSignup = async (req, res, next) => {
 };
 
 exports.getLogin = (req, res, next) => {
-    const errorMsg = req.flash('error')[0];
     res.render('auth/login', {
         pageTitle: 'Login',
         path: '/login',
-        errorMessage: errorMsg,
+        errorMessage: '',
         oldInput: { email: '', password: '' },
         errors: [],
     });
@@ -79,16 +79,16 @@ exports.postLogin = async (req, res, next) => {
 
     try {
         if (!errors.isEmpty()) {
-            return (
-                res.status(422)
-                    .render('auth/login', {
-                        pageTitle: 'Login',
-                        path: '/login',
-                        errorMessage: errors.array()[0].msg,
-                        oldInput: { email, password },
-                        errors: errors.array()
-                    })
-            );
+            return res
+                .status(422)
+                .render('auth/login', {
+                    pageTitle: 'Login',
+                    path: '/login',
+                    errorMessage: errors.array()[0].msg,
+                    oldInput: { email, password },
+                    errors: errors.array()
+                });
+
         }
 
         req.session.isLoggedIn = true;
@@ -120,7 +120,7 @@ exports.getResetPassword = (req, res, next) => {
 };
 exports.postResetPassword = (req, res, next) => {
     const email = req.body.email;
-    const errorMsg = req.flash('error')[0];
+    // const errorMsg = req.flash('error')[0];
     crypto.randomBytes(32, (err, buffer) => {
         if (err) {
             console.log('randomBytes Err', err);
