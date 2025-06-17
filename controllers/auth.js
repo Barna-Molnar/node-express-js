@@ -91,8 +91,8 @@ exports.postLogin = async (req, res, next) => {
 
         }
 
-        req.session.isLoggedIn = true;
-        req.session.user = exisingUser;
+        // req.session.isLoggedIn = true;
+        // req.session.user = exisingUser;
         res.redirect('/');
 
     } catch (error) {
