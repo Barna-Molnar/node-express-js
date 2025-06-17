@@ -1,3 +1,5 @@
+const { validationResult } = require('express-validator');
+
 const Product = require('../models/product');
 
 exports.getAdminProducts = (req, res, next) => {
@@ -22,6 +24,9 @@ exports.getAddProduct = (req, res, next) => {
         pageTitle: 'Add Product Page',
         path: '/admin/add-product',
         editing: false,
+        hasError: false,
+        errorMessage: '',
+        errors: []
     });
 };
 exports.getEditProduct = (req, res, next) => {
@@ -37,21 +42,43 @@ exports.getEditProduct = (req, res, next) => {
                 pageTitle: 'Edit Product',
                 path: '/admin/edit-product',
                 editing: editMode,
+                hasError: false,
+                errorMessage: '',
+                errors: [],
                 product: product,
             });
         });
 };
 exports.postEditProduct = async (req, res, next) => {
-    const existingProduct = await Product.findById(req.body.productId);
+    const title = req.body.title;
+    const price = req.body.price;
+    const description = req.body.description || '';
+    const imageUrl = req.body.imageUrl;
+    const productId = req.body.productId;
 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product Page',
+            path: '/admin/add-product',
+            editing: true,
+            hasError: true,
+            product: { title, price, description, imageUrl, _id: productId },
+            errors: errors.array(),
+            errorMessage: errors.array()[0].msg,
+        });
+    }
+
+    const existingProduct = await Product.findById(productId);
     if (existingProduct.userId.toString() !== req.user._id.toString()) {
+        // Normally we do not see this product , but for safetyness we double check
         req.flash('error', 'Action Denied! You tried to edit a Product which was not created by you!');
         return res.redirect('/');
     }
-    existingProduct.title = req.body.title;
-    existingProduct.price = req.body.price;
-    existingProduct.description = req.body.description;
-    existingProduct.imageUrl = req.body.imageUrl;
+    existingProduct.title = title;
+    existingProduct.price = price;
+    existingProduct.description = description;
+    existingProduct.imageUrl = imageUrl;
 
     await existingProduct.save();
     res.redirect('/');
@@ -65,16 +92,28 @@ exports.postDeleteProduct = (req, res, next) => {
         .catch(err => console.log(err));
 };
 exports.postAddProduct = (req, res, next) => {
-    const newProduct = {
-        title: req.body.title,
-        price: req.body.price,
-        description: req.body.description,
-        imageUrl: req.body.imageUrl,
-        userId: req.user._id
-    };
-    const product = new Product(newProduct);
-    product
-        .save()
+    const title = req.body.title;
+    const price = req.body.price;
+    const description = req.body.description;
+    const imageUrl = req.body.imageUrl;
+    const userId = req.user._id;
+
+    const errors = validationResult(req);
+    console.log(errors.array());
+    if (!errors.isEmpty()) {
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product Page',
+            path: '/admin/add-product',
+            editing: false,
+            hasError: true,
+            product: { title, price, description, imageUrl },
+            errors: errors.array(),
+            errorMessage: errors.array()[0].msg,
+        });
+    }
+
+    const product = new Product({ title, price, description, imageUrl, userId });
+    product.save()
         .then(result => {
             res.redirect('/');
         })
