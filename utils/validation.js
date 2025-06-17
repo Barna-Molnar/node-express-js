@@ -29,17 +29,17 @@ const confirmedPasswordValidation_singup = () => [
         }
         return true;
     })
-    .trim()
+        .trim()
 ];
 
 const userValidation_login = () => [
     body('email').notEmpty().withMessage('Email is required.'),
     body('email').isEmail().normalizeEmail().withMessage('Email has to be valid!'),
-    
+
     body('password').notEmpty().trim().withMessage('Password is required.'),
 
     body()
-        .custom(async ({ email, password }, _) => {
+        .custom(async ({ email, password }, { req }) => {
             const exisingUser = await User.findOne({ email: email });
             if (!exisingUser) {
                 throw new Error('User not found! Please check your email!');
@@ -49,13 +49,23 @@ const userValidation_login = () => [
                     throw new Error('Invalid password...');
                 }
             }
+            req.session.isLoggedIn = true;
+            req.session.user = exisingUser;
             return true;
         })
 ];
 
+const productValidation = () => [
+    body('title').isString().isLength({ min: 5 }),
+    body('imageUrl').isURL(),
+    body('price').isFloat(),
+    body('description').isString().isLength({ min: 10, max: 200 }),
+];
+
 const validation = {
     signup: { passwordValidation_signup, emailValidation_signup, confirmedPasswordValidation_singup },
-    login: { userValidation_login, }
+    login: { userValidation_login, },
+    product: { productValidation }
 };
 
 module.exports = validation;
