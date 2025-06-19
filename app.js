@@ -69,6 +69,7 @@ async function start() {
                 next();
 
             } catch (err) {
+                // inside callbacks or catch blocks you have to use next to throw through the errors
                 next(new Error(err));
             }
         });
