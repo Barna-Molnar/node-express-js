@@ -51,8 +51,13 @@ async function start() {
         app.use(csrfProtection);
         app.use(flash());
 
-        app.use(async (req, res, next) => {
+        app.use((req, res, next) => {
+            res.locals.isLoggedIn = req.session.isLoggedIn;
+            res.locals.csrfToken = req.csrfToken();
+            next();
+        });
 
+        app.use(async (req, res, next) => {
             if (!req.session.user) { return next(); }
 
             try {
@@ -64,15 +69,8 @@ async function start() {
                 next();
 
             } catch (err) {
-                console.log(err);
-                throw new Error();
+                next(new Error(err));
             }
-        });
-
-        app.use((req, res, next) => {
-            res.locals.isLoggedIn = req.session.isLoggedIn;
-            res.locals.csrfToken = req.csrfToken();
-            next();
         });
 
         app.use('/admin', adminRoutes);
@@ -84,7 +82,12 @@ async function start() {
 
         app.use((error, req, res, next) => {
             console.log('Special error middleware in app.js', { error });
-            res.redirect('/500');
+            // res.redirect('/500');
+            res.status(500).render('500', {
+                pageTitle: 'Error!',
+                path: '/500',
+                isLoggedIn: req.session.isLoggedIn
+            });
         });
 
         app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
