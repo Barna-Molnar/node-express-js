@@ -6,13 +6,12 @@ const session = require('express-session');
 const MongoDbStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
+const mongoose = require('mongoose');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 const errorController = require('./controllers/error');
-// const User = require('./models/user');
-const mongoose = require('mongoose');
 const User = require('./models/user');
 
 global.__rootdir = __dirname; // A common convention is `__basedir` or `__rootdir`
@@ -53,15 +52,20 @@ async function start() {
         app.use(flash());
 
         app.use(async (req, res, next) => {
-            if (!req.session.user) {
-                return next();
-            }
+
+            if (!req.session.user) { return next(); }
+
             try {
                 const user = await User.findById(req.session.user._id);
+
+                if (!user) { return next(); }
+
                 req.user = user;
                 next();
+
             } catch (err) {
                 console.log(err);
+                throw new Error();
             }
         });
 
@@ -74,6 +78,8 @@ async function start() {
         app.use('/admin', adminRoutes);
         app.use('/', shopRoutes);
         app.use('/', authRoutes);
+
+        app.use('/500', errorController.error500);
         app.use('/', errorController.pageNotFound);
 
         app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));

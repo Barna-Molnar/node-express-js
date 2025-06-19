@@ -115,7 +115,10 @@ exports.postAddProduct = (req, res, next) => {
     const product = new Product({ title, price, description, imageUrl, userId });
     product.save()
         .then(result => {
-            res.redirect('/');
+            res.redirect('/admin/products');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            console.log(err)
+            res.redirect('/500');
+        });
 };
