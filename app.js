@@ -82,6 +82,11 @@ async function start() {
         app.use('/500', errorController.error500);
         app.use('/', errorController.pageNotFound);
 
+        app.use((error, req, res, next) => {
+            console.log('Special error middleware in app.js', { error });
+            res.redirect('/500');
+        });
+
         app.listen(PORT, () => console.log('Server is runnint at port ', + PORT));
 
     } catch (err) {

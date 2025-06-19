@@ -118,7 +118,7 @@ exports.postAddProduct = (req, res, next) => {
             res.redirect('/admin/products');
         })
         .catch(err => {
-            console.log(err)
-            res.redirect('/500');
+            const error = new Error(err);
+            return next(error);
         });
 };
