@@ -17,7 +17,9 @@ exports.getAdminProducts = (req, res, next) => {
         })
         .catch(err => {
             console.log('Error while fetching products : ', err);
-        });;
+            const error = new Error(err);
+            return next(error);
+        });
 };
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
@@ -69,19 +71,25 @@ exports.postEditProduct = async (req, res, next) => {
         });
     }
 
-    const existingProduct = await Product.findById(productId);
-    if (existingProduct.userId.toString() !== req.user._id.toString()) {
-        // Normally we do not see this product , but for safetyness we double check
-        req.flash('error', 'Action Denied! You tried to edit a Product which was not created by you!');
-        return res.redirect('/');
-    }
-    existingProduct.title = title;
-    existingProduct.price = price;
-    existingProduct.description = description;
-    existingProduct.imageUrl = imageUrl;
+    try {
+        const existingProduct = await Product.findById(productId);
+        if (existingProduct.userId.toString() !== req.user._id.toString()) {
+            // Normally we do not see this product , but for safetyness we double check
+            req.flash('error', 'Action Denied! You tried to edit a Product which was not created by you!');
+            return res.redirect('/');
+        }
+        existingProduct.title = title;
+        existingProduct.price = price;
+        existingProduct.description = description;
+        existingProduct.imageUrl = imageUrl;
 
-    await existingProduct.save();
-    res.redirect('/');
+        await existingProduct.save();
+        res.redirect('/');
+
+    } catch (err) {
+        const error = new Error(err);
+        return next(error);
+    }
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -89,7 +97,10 @@ exports.postDeleteProduct = (req, res, next) => {
         .then(() => {
             res.redirect('/');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            return next(error);
+        });
 };
 exports.postAddProduct = (req, res, next) => {
     const title = req.body.title;

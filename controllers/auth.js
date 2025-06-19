@@ -51,14 +51,19 @@ exports.postSignup = async (req, res, next) => {
                 html: '<h1>You successfully signed up!</h1>'
             });
             console.log({ emailSendStatus });
-        } catch (error) {
-            console.log('Error by sending mail: ', error);
+        } catch (err) {
+            console.log('Error by sending mail: ', err);
+            const error = new Error(err);
+            return next(error);
         }
 
         res.redirect('/login');
 
-    } catch (error) {
-        console.log('Error in postSignup', error);
+    } catch (err) {
+        console.log('Error in postSignup', err);
+        const error = new Error(err);
+        return next(error);
+
     }
 };
 
@@ -90,13 +95,11 @@ exports.postLogin = async (req, res, next) => {
                 });
 
         }
-
-        // req.session.isLoggedIn = true;
-        // req.session.user = exisingUser;
         res.redirect('/');
 
-    } catch (error) {
-        console.log(error);
+    } catch (err) {
+        const error = new Error(err);
+        return next(error);
     }
 };
 
@@ -153,7 +156,10 @@ exports.postResetPassword = (req, res, next) => {
                 });
 
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                const error = new Error(err);
+                return next(error);
+            });
     });
 };
 
@@ -176,7 +182,10 @@ exports.getUpdatePassword = (req, res, next) => {
                 passwordToken: token,
             });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            return next(error);
+        });
 };
 
 exports.postUpdatePassword = (req, res, next) => {
@@ -207,5 +216,8 @@ exports.postUpdatePassword = (req, res, next) => {
             console.log('Updating password was succesful');
             res.redirect('/login');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            return next(error);
+        });
 };

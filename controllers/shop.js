@@ -27,7 +27,8 @@ exports.getProduct = (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log('Error while fetching product : ', err);
+            const error = new Error(err);
+            return next(error);
         });
 };
 exports.getIndex = (req, res, next) => {
@@ -43,7 +44,8 @@ exports.getIndex = (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log('Error while fetching products : ', err);
+            const error = new Error(err);
+            return next(error);
         });
 };
 exports.postCart = (req, res, next) => {
@@ -54,7 +56,10 @@ exports.postCart = (req, res, next) => {
             console.log(`Product with id : ${productId} was added to cart`);
             res.redirect('/cart');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            return next(error);
+        });
 };
 exports.getCart = async (req, res, next) => {
     try {
@@ -67,7 +72,7 @@ exports.getCart = async (req, res, next) => {
             totalPrice: 0,
         });
     } catch (err) {
-        next(err);
+        return next(err);
     }
 };
 
@@ -102,8 +107,9 @@ exports.postCreateOrder = async (req, res, next) => {
         await req.user.clearCart();
         res.redirect('/orders');
 
-    } catch (error) {
-        console.log('ERROR', error);
+    } catch (er) {
+        const error = new Error(err);
+        return next(error);
     }
 };
 
@@ -113,15 +119,18 @@ exports.postDeleteProductFromCart = (req, res, next) => {
             console.log('Product succesfully has beed deleted from cart ...');
             res.redirect('/cart');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            return next(error);
+        });
 };
 exports.getOrders = (req, res, next) => {
     Order
-        .find({'user.userId': req.user._id})
+        .find({ 'user.userId': req.user._id })
         // .select()
         // .populate('products.productId')
         .then((orders) => {
-            console.log(orders[0])
+            console.log(orders[0]);
             res.render('shop/orders', {
                 pageTitle: 'Your Orders',
                 path: '/orders',
@@ -129,7 +138,8 @@ exports.getOrders = (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log('Error while fetching products : ', err);
+            const error = new Error(err);
+            return next(error);
         });
 };
 exports.getCheckout = (req, res, next) => {
