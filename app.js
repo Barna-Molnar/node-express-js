@@ -69,6 +69,7 @@ async function start() {
         app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'));
 
         app.use(express.static(path.join(__dirname, 'public'))); // serve static files
+        app.use('/images', express.static(path.join(__dirname, 'images'))); // serve static files
 
         app.use(session({
             secret: 'my secret',
