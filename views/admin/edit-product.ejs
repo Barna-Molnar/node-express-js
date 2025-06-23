@@ -23,7 +23,7 @@
                                     value="<%= editing || hasError ? product.title : '' %>">
                             </div>
                             <div class="form-control">
-                                <label for="image">Image URL</label>
+                                <label for="image">Image</label>
                                 <input type="file" name="image" id="image">
                             </div>
                             <!-- <div class="form-control">
@@ -41,9 +41,7 @@
                             <div class="form-control">
                                 <label for="description">Description</label>
                                 <textarea class="<%= errors.find(err => err.path === 'description') ? 'invalid' : ''%>"
-                                    name="description" id="description" rows="5">
-                                    <%= editing === 'true' || hasError ? product.description : ''%>
-                                </textarea>
+                                    name="description" id="description" rows="5"><%= editing === 'true' || hasError ? product.description : ''%></textarea>
                             </div>
                             <% if (editing) { %>
                                 <input type="hidden" name="productId" id="productId" value="<%=product._id%>">

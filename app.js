@@ -25,7 +25,8 @@ const fileStorage = multer.diskStorage({
         callback(null, 'images');
     },
     filename: (req, file, callback) => {
-        callback(null, `${new Date().toISOString()}-${file.originalname}`);
+        const timestamp = new Date().toISOString().replace(/:/g, '-');
+        callback(null, `${timestamp}-${file.originalname}`);
     },
 
 });
@@ -34,8 +35,9 @@ const fileFilter = (req, file, cb) => {
     if (
         file.mimetype === 'image/png' ||
         file.mimetype === 'image/jpg' ||
-        file.mimetype === 'image/jepg'
+        file.mimetype === 'image/jpeg'
     ) {
+        console.log({ file });
         cb(null, true);
     } else {
         cb(null, false);

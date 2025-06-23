@@ -55,7 +55,7 @@ exports.postEditProduct = async (req, res, next) => {
     const title = req.body.title;
     const price = req.body.price;
     const description = req.body.description || '';
-    const imageUrl = req.body.imageUrl;
+    const image = req.file;
     const productId = req.body.productId;
 
     const errors = validationResult(req);
@@ -81,7 +81,9 @@ exports.postEditProduct = async (req, res, next) => {
         existingProduct.title = title;
         existingProduct.price = price;
         existingProduct.description = description;
-        existingProduct.imageUrl = imageUrl;
+        if(image) {
+            existingProduct.imageUrl = image.path;
+        }
 
         await existingProduct.save();
         res.redirect('/');
@@ -106,24 +108,37 @@ exports.postAddProduct = (req, res, next) => {
     const title = req.body.title;
     const price = req.body.price;
     const description = req.body.description;
-    const imageUrl = req.file;
+    const image = req.file;
     const userId = req.user._id;
-    console.log(imageUrl)
 
+    if (!image) {
+        res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product Page',
+            path: '/admin/add-product',
+            editing: false,
+            hasError: true,
+            product: { title, price, description },
+            errors: [],
+            errorMessage: 'Incorrect image',
+            
+        });
+    }
     const errors = validationResult(req);
-    console.log(errors.array());
+    console.log('validationResult: ', errors.array());
+
     if (!errors.isEmpty()) {
         return res.status(422).render('admin/edit-product', {
             pageTitle: 'Add Product Page',
             path: '/admin/add-product',
             editing: false,
             hasError: true,
-            product: { title, price, description, imageUrl },
+            product: { title, price, description },
             errors: errors.array(),
             errorMessage: errors.array()[0].msg,
         });
     }
 
+    const imageUrl = image.path;
     const product = new Product({ title, price, description, imageUrl, userId });
     product.save()
         .then(result => {
