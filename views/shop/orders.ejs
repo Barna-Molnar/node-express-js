@@ -4,17 +4,18 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
             <main>
-                <% if (orders.length > 0) { %>
+                <% if (orders.length> 0) { %>
                     <ul>
                         <% orders.forEach(order=> { %>
                             <li>
                                 <h1>
-                                    # <%= order._id %>
+                                   Order - # <%= order._id %>
                                 </h1>
                                 <ul>
                                     <% order.products.forEach(product=> { %>
                                         <li>
-                                            <%= product.product.title %> (<%=product.quantity %>) 
+                                            <%= product.product.title %> (<%=product.quantity %>) - <a
+                                                        href='/orders/<%= order._id %>'=>Invoices</a>
                                         </li>
                                         <% }); %>
                                 </ul>
