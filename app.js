@@ -7,6 +7,7 @@ const MongoDbStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
 const mongoose = require('mongoose');
+const multer = require('multer');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -18,6 +19,28 @@ global.__rootdir = __dirname; // A common convention is `__basedir` or `__rootdi
 const PORT = process.env.PORT || 8080;
 const app = express();
 const csrfProtection = csrf();
+
+const fileStorage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, 'images');
+    },
+    filename: (req, file, callback) => {
+        callback(null, `${new Date().toISOString()}-${file.originalname}`);
+    },
+
+});
+
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jepg'
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
 
 app.set('view engine', 'ejs');
 app.set('views', 'views'); // set the views directory
@@ -40,7 +63,11 @@ async function start() {
         });
 
         app.use(bodyParser.urlencoded({ extended: false }));
+
+        app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'));
+
         app.use(express.static(path.join(__dirname, 'public'))); // serve static files
+
         app.use(session({
             secret: 'my secret',
             resave: false,
@@ -49,6 +76,7 @@ async function start() {
         }));
 
         app.use(csrfProtection);
+
         app.use(flash());
 
         app.use((req, res, next) => {
@@ -84,10 +112,11 @@ async function start() {
         app.use((error, req, res, next) => {
             console.log('Special error middleware in app.js', { error });
             // res.redirect('/500');
+
             res.status(500).render('500', {
                 pageTitle: 'Error!',
                 path: '/500',
-                isLoggedIn: req.session.isLoggedIn
+                isLoggedIn: req.session?.isLoggedIn,
             });
         });
 

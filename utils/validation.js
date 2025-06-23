@@ -57,7 +57,7 @@ const userValidation_login = () => [
 
 const productValidation = () => [
     body('title').isString().isLength({ min: 5 }),
-    body('imageUrl').isURL(),
+    // body('imageUrl').isURL(), // currently commented out because of fileUpload
     body('price').isFloat(),
     body('description').isString().isLength({ min: 10, max: 200 }),
 ];
