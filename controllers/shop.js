@@ -154,23 +154,27 @@ exports.getCheckout = (req, res, next) => {
 };
 exports.getInvoice = (req, res, next) => {
     const errors = validationResult(req);
-    if(!errors.isEmpty()) {
+    if (!errors.isEmpty()) {
         console.log(errors.array());
-        return next(new Error(errors.array()[0].msg))
+        return next(new Error(errors.array()[0].msg));
     }
     const orderId = req.params.orderId;
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join('data', 'invoices', invoiceName);
 
+    const file = fs.createReadStream(invoicePath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+    file.pipe(res)
 
-    fs.readFile(invoicePath, (err, data) => {
-        if (err) {
-            // it goes to the special express middleware, see set up in App.js
-            return next(err);
-        }
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${invoiceName}"`);
-        res.send(data);
-    });
+    // fs.readFile(invoicePath, (err, data) => {
+    //     if (err) {
+    //         // it goes to the special express middleware, see set up in App.js
+    //         return next(err);
+    //     }
+    //     res.setHeader('Content-Type', 'application/pdf');
+    //     res.setHeader('Content-Disposition', `attachment; filename="${invoiceName}"`);
+    //     res.send(data);
+    // });
 
 };

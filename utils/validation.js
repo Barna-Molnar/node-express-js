@@ -67,7 +67,7 @@ const orderValidation = () => [
         .custom(async ({orderId}, { req }) => {
             try {
                 const exisingOrder = await Order.findById(orderId);
-                if(exisingOrder.user.userId.toString() === req.user._id.toString()) {
+                if(exisingOrder.user.userId.toString() !== req.user._id.toString()) {
                     throw new Error('This invoice belong to another user!')
                 } else {
                     return true;
