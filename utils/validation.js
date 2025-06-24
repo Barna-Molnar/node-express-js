@@ -1,7 +1,8 @@
-const { check, body } = require('express-validator');
+const { check, body, param } = require('express-validator');
 const bcrypt = require('bcryptjs');
 
 const User = require('../models/user');
+const Order = require('../models/order');
 
 const passwordValidation_signup = () => [
     body('password')
@@ -61,11 +62,28 @@ const productValidation = () => [
     body('price').isFloat(),
     body('description').isString().isLength({ min: 10, max: 200 }),
 ];
+const orderValidation = () => [
+    param()
+        .custom(async ({orderId}, { req }) => {
+            try {
+                const exisingOrder = await Order.findById(orderId);
+                if(exisingOrder.user.userId.toString() === req.user._id.toString()) {
+                    throw new Error('This invoice belong to another user!')
+                } else {
+                    return true;
+                }
+                
+            } catch (error) {
+                throw new Error(error)
+            }
+        })
+];
 
 const validation = {
     signup: { passwordValidation_signup, emailValidation_signup, confirmedPasswordValidation_singup },
     login: { userValidation_login, },
-    product: { productValidation }
+    product: { productValidation },
+    order: { orderValidation }
 };
 
 module.exports = validation;

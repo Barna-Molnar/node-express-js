@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Product = require('../models/product');
 const Order = require('../models/order');
+const { validationResult } = require('express-validator');
 
 exports.getProducts = (req, res, next) => {
     Product
@@ -132,7 +133,6 @@ exports.getOrders = (req, res, next) => {
         // .select()
         // .populate('products.productId')
         .then((orders) => {
-            console.log(orders[0]);
             res.render('shop/orders', {
                 pageTitle: 'Your Orders',
                 path: '/orders',
@@ -153,15 +153,24 @@ exports.getCheckout = (req, res, next) => {
 
 };
 exports.getInvoice = (req, res, next) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+        console.log(errors.array());
+        return next(new Error(errors.array()[0].msg))
+    }
     const orderId = req.params.orderId;
     const invoiceName = `invoice-${orderId}.pdf`;
-    const invoicePath = path.join('data', 'invoices', invoiceName)
+    const invoicePath = path.join('data', 'invoices', invoiceName);
+
+
     fs.readFile(invoicePath, (err, data) => {
-        if(err) {
+        if (err) {
             // it goes to the special express middleware, see set up in App.js
-            return next(err)
+            return next(err);
         }
-        res.send(data)
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${invoiceName}"`);
+        res.send(data);
     });
 
 };
