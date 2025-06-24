@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const PDFDocument = require('pdfkit');
+
 const Product = require('../models/product');
 const Order = require('../models/order');
 const { validationResult } = require('express-validator');
@@ -161,11 +163,33 @@ exports.getInvoice = (req, res, next) => {
     const orderId = req.params.orderId;
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join('data', 'invoices', invoiceName);
+    const products = req.session.user.orderedProdList;
+    let totalPrice = 0;
 
-    const file = fs.createReadStream(invoicePath);
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
-    file.pipe(res)
+    const pdfdoc = new PDFDocument();
+    pdfdoc.pipe(fs.createWriteStream(invoicePath));
+    pdfdoc.pipe(res);
+
+    pdfdoc.fontSize(24).text(`Invoice for user: ${req.user.email}`);
+    pdfdoc.fontSize(20).text('---------------------------------------------------------------------');
+
+    products.forEach((prod, index) => {
+        totalPrice += prod.quantity * prod.product.price;
+        pdfdoc.fontSize(16).text(`${prod.product.title} - ${prod.quantity} * ${prod.product.price}`);
+        pdfdoc.fontSize(16).text('');
+        index < products.length - 1 && pdfdoc.fontSize(10).text('------------------------------------------------------------------------------------------------------------------------------------------');
+    });
+
+    pdfdoc.fontSize(16).text('');
+    pdfdoc.fontSize(20).text('---------------------------------------------------------------------');
+    pdfdoc.fontSize(20).text(`Total Price: ${totalPrice} $`);
+
+    pdfdoc.end();
+
+    // const file = fs.createReadStream(invoicePath);
+    // res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+    // file.pipe(res)
 
     // fs.readFile(invoicePath, (err, data) => {
     //     if (err) {

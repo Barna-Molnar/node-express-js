@@ -70,6 +70,7 @@ const orderValidation = () => [
                 if(exisingOrder.user.userId.toString() !== req.user._id.toString()) {
                     throw new Error('This invoice belong to another user!')
                 } else {
+                    req.session.user.orderedProdList = exisingOrder.products
                     return true;
                 }
                 
