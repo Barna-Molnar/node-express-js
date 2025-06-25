@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const Product = require('../models/product');
+const { deleteFile } = require('../utils/file');
 
 exports.getAdminProducts = (req, res, next) => {
     Product
@@ -81,7 +82,10 @@ exports.postEditProduct = async (req, res, next) => {
         existingProduct.title = title;
         existingProduct.price = price;
         existingProduct.description = description;
-        if(image) {
+        if (image) {
+            // remove static image file 
+            deleteFile(existingProduct.imageUrl);
+            // set new image path
             existingProduct.imageUrl = image.path;
         }
 
@@ -94,15 +98,25 @@ exports.postEditProduct = async (req, res, next) => {
     }
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-    Product.deleteOne({ _id: req.body.productId, userId: req.user._id })
-        .then(() => {
-            res.redirect('/');
-        })
-        .catch(err => {
-            const error = new Error(err);
-            return next(error);
-        });
+exports.postDeleteProduct = async (req, res, next) => {
+    const productId = req.body.productId;
+    const userId = req.user._id;
+    try {
+        const exisintProduct = await Product.findById(productId);
+        console.log('postDeleteProduct ', { exisintProduct });
+        // delete static file 
+        deleteFile(exisintProduct.imageUrl);
+
+        // delete file in db
+        const deletionResult = await exisintProduct.deleteOne({ _id: productId, userId: userId });
+        console.log('postDeleteProduct ', { deletionResult });
+
+        res.redirect('/');
+
+    } catch (error) {
+        console.log('postDeleteProduct error', error);
+        return next(new Error(error));
+    }
 };
 exports.postAddProduct = (req, res, next) => {
     const title = req.body.title;
@@ -120,7 +134,7 @@ exports.postAddProduct = (req, res, next) => {
             product: { title, price, description },
             errors: [],
             errorMessage: 'Incorrect image',
-            
+
         });
     }
     const errors = validationResult(req);
