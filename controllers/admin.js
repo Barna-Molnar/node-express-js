@@ -1,6 +1,8 @@
 const { validationResult } = require('express-validator');
+const { ObjectId } = require('mongodb');
 
 const Product = require('../models/product');
+const Order = require('../models/order');
 const { deleteFile } = require('../utils/file');
 
 exports.getAdminProducts = (req, res, next) => {
@@ -99,17 +101,18 @@ exports.postEditProduct = async (req, res, next) => {
 };
 
 exports.postDeleteProduct = async (req, res, next) => {
-    const productId = req.body.productId;
+    const productIdToRemove = req.body.productId;
     const userId = req.user._id;
     try {
-        const exisintProduct = await Product.findById(productId);
-        console.log('postDeleteProduct ', { exisintProduct });
+        const exisintProduct = await Product.findById(productIdToRemove);
         // delete static file 
         deleteFile(exisintProduct.imageUrl);
-
         // delete file in db
-        const deletionResult = await exisintProduct.deleteOne({ _id: productId, userId: userId });
+        const deletionResult = await exisintProduct.deleteOne({ _id: productIdToRemove, userId: userId });
         console.log('postDeleteProduct ', { deletionResult });
+
+        // update all existing order which hold this product as well 
+        removeProductsFromExistingOrders(productIdToRemove);
 
         res.redirect('/');
 
@@ -162,4 +165,26 @@ exports.postAddProduct = (req, res, next) => {
             const error = new Error(err);
             return next(error);
         });
+};
+
+const removeProductsFromExistingOrders = async (productIdToRemove) => {
+    const ordersToUpdate = await Order.find({
+        'products.product._id': new ObjectId(productIdToRemove)
+    });
+
+    for (const order of ordersToUpdate) {
+        // Filter out the product to be removed from the products array
+        // We compare product.product._id (which is an ObjectId) with our productObjectId
+        order.products = order.products.filter(item => !item.product._id.equals(productIdToRemove));
+
+        if (order.products.length > 0) {
+            // Save the updated order
+            await order.save();
+            console.log(`Updated order ${order._id}: product ${productIdToRemove} removed.`);
+        } else {
+            // delete empty order
+            await order.deleteOne();
+            console.log(`Order ${order._id}: was deleted.`);
+        }
+    }
 };

@@ -80,7 +80,6 @@ exports.getCart = async (req, res, next) => {
         return next(err);
     }
 };
-
 exports.postCreateOrder = async (req, res, next) => {
     try {
         const pupalatedUserObject = await req.user.populate('cart.items.productId');
@@ -117,7 +116,6 @@ exports.postCreateOrder = async (req, res, next) => {
         return next(error);
     }
 };
-
 exports.postDeleteProductFromCart = (req, res, next) => {
     req.user.deleteFromCartById(req.body.productId)
         .then(_deletionResult => {
