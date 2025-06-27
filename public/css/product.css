@@ -55,10 +55,10 @@
 
 .pagination__item--disabled {
   border: 1px solid gray;
-  background-color: grey;
-  color: lightgray;
-  cursor: not-allowed; 
-  pointer-events: none; 
+  color: gray;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.6; 
 }
 .pagination__item--active {
   border: 1px solid #00695c;

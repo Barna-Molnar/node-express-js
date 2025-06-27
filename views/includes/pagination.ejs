@@ -1,0 +1,17 @@
+<div class="pagination">
+    <% if (hasPreviousPage) { %>
+        <a href="?page=<%= currentPageNumber - 1%>" class="pagination__item">Previous</a>
+    <% } else { %>
+        <span class="pagination__item pagination__item--disabled">Previous</span>
+    <% } %>
+
+    <span class="pagination__item pagination__item--active">
+        <%= currentPageNumber %>
+    </span>
+
+    <% if (hasNextPage) { %>
+        <a href="?page=<%= currentPageNumber + 1%>" class="pagination__item">Next</a>
+    <% } else { %>
+        <span class="pagination__item pagination__item--disabled">Next</span>
+    <% } %>
+</div>

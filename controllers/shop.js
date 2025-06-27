@@ -26,8 +26,6 @@ exports.getProducts = (req, res, next) => {
                 prods: products,
                 pageTitle: 'All Products',
                 path: '/products',
-                totalNumberOfProduct: totalNumberOfProduct,
-                lastPageNumber: numberOfPages,
                 currentPageNumber: currentPageNumber,
                 hasPreviousPage: numberOfPages > 1 && currentPageNumber > 1,
                 hasNextPage: numberOfPages > currentPageNumber
