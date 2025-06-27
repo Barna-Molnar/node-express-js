@@ -53,17 +53,31 @@ exports.getProduct = (req, res, next) => {
 };
 exports.getIndex = (req, res, next) => {
     const errorMsg = req.flash('error')[0];
-    Product
-        .find()
-        .then((rows) => {
+    const currentPageNumber = +req.query.page || 1;
+    let totalNumberOfProduct = 0;
+
+    Product.find().countDocuments()
+        .then(numberOfPruduct => {
+            totalNumberOfProduct = numberOfPruduct;
+            return Product
+                .find()
+                .skip((currentPageNumber - 1) * ITEMS_PER_PAGE)
+                .limit(ITEMS_PER_PAGE);
+        })
+        .then((products) => {
+            const numberOfPages = Math.ceil(totalNumberOfProduct / ITEMS_PER_PAGE);
             res.render('shop/index', {
-                prods: rows,
+                prods: products,
                 pageTitle: 'Shop',
                 path: '/',
                 errorMessage: errorMsg,
+                currentPageNumber: currentPageNumber,
+                hasPreviousPage: numberOfPages > 1 && currentPageNumber > 1,
+                hasNextPage: numberOfPages > currentPageNumber
             });
         })
         .catch(err => {
+            console.log('Error while fetching products : ', err);
             const error = new Error(err);
             return next(error);
         });
