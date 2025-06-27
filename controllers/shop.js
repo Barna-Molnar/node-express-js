@@ -6,14 +6,31 @@ const Product = require('../models/product');
 const Order = require('../models/order');
 const { validationResult } = require('express-validator');
 
+const ITEMS_PER_PAGE = 2;
+
 exports.getProducts = (req, res, next) => {
-    Product
-        .find()
+    let totalNumberOfProduct = 0;
+    const currentPageNumber = +req.query.page || 1;
+
+    Product.find().countDocuments()
+        .then(numberOfPruduct => {
+            totalNumberOfProduct = numberOfPruduct;
+            return Product
+                .find()
+                .skip((currentPageNumber - 1) * ITEMS_PER_PAGE)
+                .limit(ITEMS_PER_PAGE);
+        })
         .then((products) => {
+            const numberOfPages = Math.ceil(totalNumberOfProduct / ITEMS_PER_PAGE);
             res.render('shop/product-list', {
                 prods: products,
                 pageTitle: 'All Products',
                 path: '/products',
+                totalNumberOfProduct: totalNumberOfProduct,
+                lastPageNumber: numberOfPages,
+                currentPageNumber: currentPageNumber,
+                hasPreviousPage: numberOfPages > 1 && currentPageNumber > 1,
+                hasNextPage: numberOfPages > currentPageNumber
             });
         })
         .catch(err => {

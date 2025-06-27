@@ -1,27 +1,67 @@
 .product-form {
-    width: 20rem;
-    max-width: 90%;
-    margin: auto;
-    display: block;
+  width: 20rem;
+  max-width: 90%;
+  margin: auto;
+  display: block;
 }
 
 .product-item {
-    width: 20rem;
-    max-width: 95%;
-    margin: 1rem;
+  width: 20rem;
+  max-width: 95%;
+  margin: 1rem;
 }
 
 .product__title {
-    font-size: 1.2rem;
-    text-align: center;
+  font-size: 1.2rem;
+  text-align: center;
 }
 
 .product__price {
-    text-align: center;
-    color: #4d4d4d;
-    margin-bottom: 0.5rem;
+  text-align: center;
+  color: #4d4d4d;
+  margin-bottom: 0.5rem;
 }
 
 .product__description {
-    text-align: center;
+  text-align: center;
 }
+
+.pagination {
+  display: flex;
+  gap: 16px;
+  margin-top: 2rem;
+  justify-content: center;
+}
+.pagination-item {
+  text-decoration: none;
+  border: 1px solid #00695c;
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+}
+.pagination-item:hover,
+.pagination-item:active {
+  color: white;
+  background-color: #00695c;
+}
+.pagination .disabled {
+  border: 1px solid gray;
+  background-color: grey;
+  color: lightgray;
+}
+
+.pagination .active {
+  border: 1px solid #00695c;
+  background-color: #00695c;
+  color: white;
+}
+
+/* .pagination a {
+    text-decoration: none;
+    border: 1px solid #00695c;
+    padding: .5rem 1rem;
+}
+
+.pagination span.disabled {
+    pointer-events: none;
+    color: gray;
+} */
