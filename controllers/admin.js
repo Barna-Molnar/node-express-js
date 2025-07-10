@@ -100,8 +100,9 @@ exports.postEditProduct = async (req, res, next) => {
     }
 };
 
-exports.postDeleteProduct = async (req, res, next) => {
-    const productIdToRemove = req.body.productId;
+exports.deleteProduct = async (req, res, next) => {
+    console.log('deleteProduct called')
+    const productIdToRemove = req.params.productId;
     const userId = req.user._id;
     try {
         const exisintProduct = await Product.findById(productIdToRemove);
@@ -114,11 +115,12 @@ exports.postDeleteProduct = async (req, res, next) => {
         // update all existing order which hold this product as well 
         removeProductsFromExistingOrders(productIdToRemove);
 
-        res.redirect('/');
+        res.status(200).json({ message: 'Product deleted successfully!' });
 
     } catch (error) {
         console.log('postDeleteProduct error', error);
-        return next(new Error(error));
+        res.status(500).json({ message: 'Product deletion has failed!' });
+        // return next(new Error(error));
     }
 };
 exports.postAddProduct = (req, res, next) => {
