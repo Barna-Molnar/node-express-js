@@ -98,12 +98,28 @@ exports.postCart = (req, res, next) => {
 exports.getCart = async (req, res, next) => {
     try {
         const pupaltedUserObject = await req.user.populate('cart.items.productId'); // this populates in-place
-
         res.render('shop/cart', {
             pageTitle: 'Your Cart',
             path: '/cart',
             products: pupaltedUserObject.cart.items,
             totalPrice: 0,
+        });
+    } catch (err) {
+        return next(err);
+    }
+};
+exports.getCheckout = async (req, res, next) => {
+    try {
+        const pupaltedUserObject = await req.user.populate('cart.items.productId'); // this populates in-place
+        const totalPrice = pupaltedUserObject.cart.items.reduce((acc, currentValue) => {
+            return acc + currentValue.quantity * currentValue.productId.price;
+        }, 0)
+
+        res.render('shop/checkout', {
+            pageTitle: 'Checkout',
+            path: '/checkout',
+            products: pupaltedUserObject.cart.items,
+            totalPrice: totalPrice,
         });
     } catch (err) {
         return next(err);
@@ -172,14 +188,6 @@ exports.getOrders = (req, res, next) => {
             const error = new Error(err);
             return next(error);
         });
-};
-exports.getCheckout = (req, res, next) => {
-
-    res.render('shop/checkout', {
-        pageTitle: 'Checkout',
-        path: '/checkout',
-    });
-
 };
 exports.getInvoice = (req, res, next) => {
     const errors = validationResult(req);
